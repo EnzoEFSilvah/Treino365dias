@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desafio 365 Dias - Seu Diário de Saúde</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>🏋️ Desafio 365 Dias</h1>
+        <p class="subtitle">Seu diário completo de saúde e bem-estar</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Estatísticas do Dia -->
+      <section class="stats-section">
+        <div class="stat-card">
+          <div class="stat-icon">💪</div>
+          <div class="stat-info">
+            <h3>Treinos Hoje</h3>
+            <p class="stat-value" id="workoutsToday">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💧</div>
+          <div class="stat-info">
+            <h3>Água (ml)</h3>
+            <p class="stat-value" id="waterToday">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🍎</div>
+          <div class="stat-info">
+            <h3>Refeições</h3>
+            <p class="stat-value" id="mealsToday">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Abas de Navegação -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="treinos">💪 Treinos</button>
+        <button class="tab-btn" data-tab="agua">💧 Água</button>
+        <button class="tab-btn" data-tab="alimentacao">🍽️ Alimentação</button>
+      </div>
+
+      <!-- Seção de Treinos -->
+      <section id="treinos" class="tab-content active">
+        <!-- Treino do Dia -->
+        <h2>💪 Treino do Dia - <span id="currentDay"></span></h2>
+        <div class="form-card workout-plan-card">
+          <div class="workout-header">
+            <div class="workout-info">
+              <p class="workout-day-name" id="workoutDayName"></p>
+              <p class="workout-progress">
+                <span id="exercisesCompleted">0</span>/<span id="totalExercises"
+                  >0</span
+                >
+                exercícios concluídos
+              </p>
+            </div>
+            <div class="workout-actions">
+              <button class="btn btn-edit" id="editWorkoutBtn">
+                ✏️ Editar Treino
+              </button>
+              <button class="btn btn-complete" id="completeWorkoutBtn">
+                ✅ Concluir Treino
+              </button>
+            </div>
+          </div>
+
+          <div id="exercisesList" class="exercises-list"></div>
+
+          <!-- Modal de Edição -->
+          <div id="editModal" class="modal">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>Editar Treino - <span id="modalDayName"></span></h3>
+                <button class="modal-close">&times;</button>
+              </div>
+              <div class="modal-body">
+                <div id="editExercisesList"></div>
+                <button class="btn btn-add-exercise" id="addExerciseBtn">
+                  ➕ Adicionar Exercício
+                </button>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEditBtn">
+                  Cancelar
+                </button>
+                <button class="btn btn-primary" id="saveWorkoutBtn">
+                  Salvar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendário de Treinos -->
+        <h3>📅 Calendário de Treinos - 2025</h3>
+        <div class="form-card">
+          <div class="calendar-stats">
+            <div class="calendar-stat">
+              <span class="stat-label">Total de treinos em 2025:</span>
+              <span class="stat-number" id="yearWorkoutCount">0</span>
+            </div>
+            <div class="calendar-stat">
+              <span class="stat-label">Este mês:</span>
+              <span class="stat-number" id="monthWorkoutCount">0</span>
+            </div>
+            <div class="calendar-legend">
+              <span class="legend-item"
+                ><span class="legend-dot completed"></span> Treino
+                concluído</span
+              >
+              <span class="legend-item"
+                ><span class="legend-dot today"></span> Hoje</span
+              >
+            </div>
+          </div>
+          <div id="workoutCalendar" class="workout-calendar"></div>
+        </div>
+
+        <h2>Registrar Treino Livre</h2>
+        <form id="workoutForm" class="form-card">
+          <div class="form-group">
+            <label for="workoutType">Tipo de Treino</label>
+            <select id="workoutType" required>
+              <option value="">Selecione...</option>
+              <option value="Musculação">Musculação</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Natação">Natação</option>
+              <option value="Corrida">Corrida</option>
+              <option value="Ciclismo">Ciclismo</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="workoutDuration">Duração (minutos)</label>
+            <input type="number" id="workoutDuration" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="workoutNotes">Observações</label>
+            <textarea id="workoutNotes" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Adicionar Treino
+          </button>
+        </form>
+
+        <h3>Histórico de Treinos</h3>
+        <div id="workoutList" class="records-list"></div>
+      </section>
+
+      <!-- Seção de Água -->
+      <section id="agua" class="tab-content">
+        <h2>Consumo de Água</h2>
+        <div class="form-card">
+          <div class="water-tracker">
+            <div class="water-goal">
+              <p>Meta diária: <strong id="waterGoal">4000ml</strong></p>
+              <div class="progress-bar">
+                <div id="waterProgress" class="progress-fill"></div>
+              </div>
+              <p class="progress-text">
+                <span id="waterPercent">0</span>% da meta
+              </p>
+            </div>
+            <div class="water-buttons">
+              <button class="btn btn-water" data-amount="250">+ 250ml</button>
+              <button class="btn btn-water" data-amount="500">+ 500ml</button>
+              <button class="btn btn-water" data-amount="1000">+ 1L</button>
+            </div>
+            <div class="form-group">
+              <label for="customWater">Quantidade personalizada (ml)</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="customWater"
+                  min="1"
+                  placeholder="Ex: 300"
+                />
+                <button
+                  type="button"
+                  id="addCustomWater"
+                  class="btn btn-secondary"
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3>Histórico de Consumo</h3>
+        <div id="waterList" class="records-list"></div>
+      </section>
+
+      <!-- Seção de Alimentação -->
+      <section id="alimentacao" class="tab-content">
+        <!-- Metas Nutricionais -->
+        <h2>📊 Metas Diárias</h2>
+        <div class="form-card nutrition-goals">
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-icon">🔥</span>
+              <span class="goal-label">Calorias</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-bar">
+                <div id="caloriesProgress" class="progress-fill"></div>
+              </div>
+              <div class="goal-numbers">
+                <span class="current-value" id="currentCalories">0</span>
+                <span class="separator">/</span>
+                <span class="target-value">2.600-2.800</span>
+                <span class="unit">kcal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-icon">🥩</span>
+              <span class="goal-label">Proteína</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-bar">
+                <div id="proteinProgress" class="progress-fill"></div>
+              </div>
+              <div class="goal-numbers">
+                <span class="current-value" id="currentProtein">0</span>
+                <span class="separator">/</span>
+                <span class="target-value">130-140</span>
+                <span class="unit">g</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-icon">💧</span>
+              <span class="goal-label">Água</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-bar">
+                <div id="waterGoalProgress" class="progress-fill"></div>
+              </div>
+              <div class="goal-numbers">
+                <span class="current-value" id="currentWaterGoal">0</span>
+                <span class="separator">/</span>
+                <span class="target-value">4.000</span>
+                <span class="unit">ml</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2>Registrar Refeição</h2>
+        <form id="mealForm" class="form-card">
+          <div class="form-group">
+            <label for="mealType">Tipo de Refeição</label>
+            <select id="mealType" required>
+              <option value="">Selecione...</option>
+              <option value="Café da Manhã">Café da Manhã</option>
+              <option value="Lanche da Manhã">Lanche da Manhã</option>
+              <option value="Almoço">Almoço</option>
+              <option value="Lanche da Tarde">Lanche da Tarde</option>
+              <option value="Jantar">Jantar</option>
+              <option value="Ceia">Ceia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mealDescription">Descrição</label>
+            <textarea
+              id="mealDescription"
+              rows="3"
+              required
+              placeholder="O que você comeu?"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="mealCalories">Calorias</label>
+            <input
+              type="number"
+              id="mealCalories"
+              min="0"
+              placeholder="Ex: 500"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="mealProtein">Proteína (gramas)</label>
+            <input
+              type="number"
+              id="mealProtein"
+              min="0"
+              placeholder="Ex: 30"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Adicionar Refeição
+          </button>
+        </form>
+
+        <h3>Histórico de Refeições</h3>
+        <div id="mealList" class="records-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>💪 Desafio 365 Dias - Transforme sua vida, um dia de cada vez!</p>
+      </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
