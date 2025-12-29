@@ -11,6 +11,8 @@ body {
   min-height: 100vh;
   color: #333;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
@@ -183,6 +185,24 @@ main {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices - aumentar área de toque */
+  .btn {
+    padding: 0.9rem 1.5rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-water,
+  .tab-btn,
+  .exercise-checkbox {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .btn-primary {
@@ -957,49 +977,104 @@ footer {
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
-/* Responsive */
+/* Responsive - Tablet (768px e abaixo) */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+
+  header {
+    padding: 1.5rem 0;
+  }
+
   header h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
   }
 
   .stats-section {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.2rem;
+  }
+
+  .stat-icon {
+    font-size: 2.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+  }
+
+  main {
+    padding: 1.5rem 0;
   }
 
   .tabs {
     flex-direction: column;
+    gap: 0.8rem;
   }
 
   .tab-btn {
     min-width: 100%;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+
+  .tab-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-card {
+    padding: 1.5rem;
+    border-radius: 12px;
   }
 
   .water-buttons {
     flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .btn-water {
+    min-width: 100%;
   }
 
   .input-group {
     flex-direction: column;
+    gap: 0.8rem;
   }
 
   .record-item {
     flex-direction: column;
     gap: 1rem;
+    padding: 1.2rem;
   }
 
   .workout-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
   }
 
   .workout-actions {
     width: 100%;
+    gap: 0.8rem;
   }
 
   .btn-edit,
   .btn-complete {
     flex: 1;
+    padding: 0.7rem 1rem;
+  }
+
+  .exercise-item {
+    padding: 0.9rem;
   }
 
   .workout-calendar {
@@ -1017,10 +1092,20 @@ footer {
 
   .modal-content {
     margin: 1rem auto;
+    max-width: 90%;
+  }
+
+  .modal-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
   }
 
   .default-meals-container {
     grid-template-columns: 1fr;
+    gap: 1.2rem;
   }
 
   .meal-macros {
@@ -1028,8 +1113,768 @@ footer {
   }
 }
 
+/* Responsive - Mobile (480px e abaixo) */
 @media (max-width: 480px) {
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  html, body {
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  header {
+    padding: 1.2rem 0;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  main {
+    padding: 1.2rem 0;
+  }
+
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+    gap: 0.8rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+    min-width: 50px;
+  }
+
+  .stat-info h3 {
+    font-size: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .tab-btn {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    min-width: 100%;
+  }
+
+  .tab-content h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .tab-content h3 {
+    font-size: 1rem;
+    margin: 1.2rem 0 0.8rem;
+  }
+
+  .form-card {
+    padding: 1.2rem;
+    margin-bottom: 1.2rem;
+    border-radius: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+
+  .form-group label {
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.65rem;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+
+  .water-goal {
+    margin-bottom: 1.2rem;
+  }
+
+  .water-goal p {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .progress-bar {
+    height: 25px;
+    margin-bottom: 0.4rem;
+  }
+
+  .progress-text {
+    font-size: 1rem;
+  }
+
+  .water-buttons {
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .btn-water {
+    padding: 0.8rem;
+    font-size: 1rem;
+    min-width: 100%;
+  }
+
+  .input-group {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .input-group input {
+    width: 100%;
+  }
+
+  .nutrition-goals {
+    gap: 1rem;
+  }
+
+  .goal-item {
+    padding: 0.9rem;
+  }
+
+  .goal-header {
+    gap: 0.4rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .goal-label {
+    font-size: 1rem;
+  }
+
+  .current-value {
+    font-size: 1.3rem;
+  }
+
+  .target-value {
+    font-size: 1rem;
+  }
+
+  .records-list {
+    gap: 0.8rem;
+  }
+
+  .record-item {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .record-title {
+    font-size: 0.95rem;
+  }
+
+  .record-details {
+    font-size: 0.9rem;
+  }
+
+  .record-actions {
+    width: 100%;
+    gap: 0.4rem;
+  }
+
+  .record-actions .btn-edit,
+  .btn-delete {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .workout-plan-card {
+    padding: 1.2rem;
+  }
+
+  .workout-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding-bottom: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .workout-day-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .workout-progress {
+    font-size: 0.9rem;
+  }
+
+  .workout-actions {
+    width: 100%;
+    gap: 0.6rem;
+    flex-direction: column;
+  }
+
+  .btn-edit,
+  .btn-complete {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .exercises-list {
+    gap: 0.6rem;
+  }
+
+  .exercise-item {
+    padding: 0.8rem;
+    gap: 0.6rem;
+  }
+
+  .exercise-checkbox {
+    min-width: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 0.6rem;
+  }
+
+  .exercise-name {
+    font-size: 0.95rem;
+  }
+
+  .exercise-details {
+    font-size: 0.85rem;
+  }
+
+  .edit-exercise-item {
+    padding: 0.9rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .edit-exercise-inputs input {
+    padding: 0.55rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-remove-exercise {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-add-exercise {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .modal {
+    padding: 0.8rem;
+  }
+
+  .modal-content {
+    margin: 0;
+    max-width: 95%;
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .modal-close {
+    font-size: 1.8rem;
+    width: 28px;
+    height: 28px;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    max-height: calc(100vh - 200px);
+  }
+
+  .modal-footer {
+    padding: 0.9rem 1rem;
+    gap: 0.6rem;
+    flex-direction: column-reverse;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    padding: 0.7rem;
+  }
+
+  .btn {
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-success {
+    width: 100%;
+  }
+
+  .calendar-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding-bottom: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+  }
+
+  .stat-number {
+    font-size: 1.3rem;
+  }
+
+  .calendar-legend {
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
+
   .workout-calendar {
     grid-template-columns: repeat(4, 1fr);
+    gap: 0.3rem;
+    max-height: 400px;
+  }
+
+  .calendar-month {
+    padding: 0.6rem;
+  }
+
+  .calendar-month-name {
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .calendar-day {
+    font-size: 0.65rem;
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+    font-size: 1rem;
+  }
+
+  .default-meals-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .default-meal-card {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .meal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .meal-description {
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .meal-macros {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .macro-item {
+    padding: 0.65rem;
+  }
+
+  .macro-icon {
+    font-size: 1.3rem;
+  }
+
+  .macro-label {
+    font-size: 0.7rem;
+  }
+
+  .macro-value {
+    font-size: 0.85rem;
+  }
+
+  .btn-small {
+    padding: 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  footer {
+    padding: 1.2rem 0;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive - Celulares Pequenos (360px e abaixo) */
+@media (max-width: 360px) {
+  header h1 {
+    font-size: 1.3rem;
+  }
+
+  .tabs {
+    gap: 0.4rem;
+  }
+
+  .tab-btn {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 0.8rem;
+  }
+
+  .stat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .record-actions {
+    flex-direction: column;
+  }
+
+  .record-actions .btn-edit,
+  .btn-delete {
+    width: 100%;
+  }
+
+  .workout-calendar {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ==========================================
+   ESTILOS DE PERFIL E AVALIAÇÕES
+   ========================================== */
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.profile-actions .btn {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  min-width: 250px;
+}
+
+/* Histórico de Avaliações */
+.assessment-cards {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.assessment-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.assessment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.assessment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.assessment-date {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.btn-delete-assessment {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn-delete-assessment:hover {
+  background: #ff3838;
+  transform: scale(1.05);
+}
+
+.assessment-data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.data-section h4 {
+  color: #667eea;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.data-section p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.data-section p strong {
+  color: #555;
+  margin-right: 0.5rem;
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 2rem;
+}
+
+/* Comparação de Avaliações */
+.comparison-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 2rem;
+}
+
+.compare-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.compare-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.comparison-results {
+  margin-top: 2rem;
+}
+
+.comparison-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.comparison-header h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.comparison-label {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  font-weight: normal;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.comparison-section {
+  border-bottom: 2px solid #f0f0f0;
+  padding: 1rem 0;
+}
+
+.comparison-section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #667eea;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 1rem;
+  text-align: center;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.comparison-row:hover {
+  background: #f9f9f9;
+}
+
+.comparison-col {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.comparison-metric {
+  font-weight: bold;
+  color: #555;
+}
+
+.diff-positive {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.diff-negative {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.diff-neutral {
+  color: #95a5a6;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Responsive - Perfil */
+@media (max-width: 768px) {
+  .comparison-controls {
+    grid-template-columns: 1fr;
+  }
+  
+  .comparison-header,
+  .comparison-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .comparison-header {
+    padding: 1rem;
+  }
+  
+  .comparison-col {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .comparison-col:last-child {
+    border-bottom: none;
+  }
+  
+  .comparison-metric::before {
+    content: "📊 ";
+  }
+  
+  .assessment-data {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-actions .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* Landscape Mode */
+@media (max-height: 500px) and (orientation: landscape) {
+  header {
+    padding: 0.8rem 0;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+  }
+
+  main {
+    padding: 0.8rem 0;
+  }
+
+  .stats-section {
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .stat-card {
+    padding: 0.8rem;
+  }
+
+  .form-card {
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 150px);
   }
 }

@@ -45,6 +45,7 @@
         <button class="tab-btn active" data-tab="treinos">💪 Treinos</button>
         <button class="tab-btn" data-tab="agua">💧 Água</button>
         <button class="tab-btn" data-tab="alimentacao">🍽️ Alimentação</button>
+        <button class="tab-btn" data-tab="perfil">👤 Perfil</button>
       </div>
 
       <!-- Seção de Treinos -->
@@ -357,6 +358,235 @@
 
         <h3>Histórico de Refeições</h3>
         <div id="mealList" class="records-list"></div>
+      </section>
+
+      <!-- Seção de Perfil -->
+      <section id="perfil" class="tab-content">
+        <h2>👤 Perfil do Usuário</h2>
+
+        <!-- Dados Pessoais -->
+        <div class="form-card">
+          <h3>📋 Dados Pessoais</h3>
+          <form id="personalDataForm" class="profile-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="userName">Nome Completo</label>
+                <input type="text" id="userName" placeholder="Seu nome" />
+              </div>
+              <div class="form-group">
+                <label for="userAge">Idade</label>
+                <input
+                  type="number"
+                  id="userAge"
+                  min="1"
+                  placeholder="Ex: 25"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="userHeight">Altura (cm)</label>
+                <input
+                  type="number"
+                  id="userHeight"
+                  min="1"
+                  placeholder="Ex: 175"
+                />
+              </div>
+              <div class="form-group">
+                <label for="userWeight">Peso (kg)</label>
+                <input
+                  type="number"
+                  id="userWeight"
+                  min="1"
+                  step="0.1"
+                  placeholder="Ex: 75.5"
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Bioimpedância -->
+        <div class="form-card">
+          <h3>⚡ Bioimpedância</h3>
+          <form id="bioimpedanceForm" class="profile-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="bodyFatPercent">% Gordura Corporal</label>
+                <input
+                  type="number"
+                  id="bodyFatPercent"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  placeholder="Ex: 15.5"
+                />
+              </div>
+              <div class="form-group">
+                <label for="muscleMassPercent">% Massa Muscular</label>
+                <input
+                  type="number"
+                  id="muscleMassPercent"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  placeholder="Ex: 45.2"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="visceralFat">Gordura Visceral</label>
+                <input
+                  type="number"
+                  id="visceralFat"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 8"
+                />
+              </div>
+              <div class="form-group">
+                <label for="bmr">Taxa Metabólica Basal (kcal)</label>
+                <input type="number" id="bmr" min="0" placeholder="Ex: 1850" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="bmi">IMC</label>
+                <input
+                  type="number"
+                  id="bmi"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 24.5"
+                  readonly
+                />
+              </div>
+              <div class="form-group">
+                <label for="biologicalAge">Idade Biológica</label>
+                <input
+                  type="number"
+                  id="biologicalAge"
+                  min="0"
+                  placeholder="Ex: 23"
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Perímetros -->
+        <div class="form-card">
+          <h3>📏 Perímetros (cm)</h3>
+          <form id="perimetersForm" class="profile-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shoulderPerimeter">Ombro</label>
+                <input
+                  type="number"
+                  id="shoulderPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 115"
+                />
+              </div>
+              <div class="form-group">
+                <label for="chestPerimeter">Peitoral</label>
+                <input
+                  type="number"
+                  id="chestPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 105"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="waistPerimeter">Cintura</label>
+                <input
+                  type="number"
+                  id="waistPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 85"
+                />
+              </div>
+              <div class="form-group">
+                <label for="abdomenPerimeter">Abdômen</label>
+                <input
+                  type="number"
+                  id="abdomenPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 90"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="hipPerimeter">Quadril</label>
+                <input
+                  type="number"
+                  id="hipPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 98"
+                />
+              </div>
+              <div class="form-group">
+                <label for="thighPerimeter">Coxa</label>
+                <input
+                  type="number"
+                  id="thighPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 58"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="assessmentDate">Data da Avaliação</label>
+              <input type="date" id="assessmentDate" required />
+            </div>
+          </form>
+        </div>
+
+        <div class="profile-actions">
+          <button type="button" class="btn btn-primary" id="saveProfileBtn">
+            💾 Salvar Avaliação
+          </button>
+        </div>
+
+        <!-- Histórico de Avaliações -->
+        <div class="form-card">
+          <h3>📊 Histórico de Avaliações</h3>
+          <div id="assessmentHistory" class="assessment-history"></div>
+        </div>
+
+        <!-- Comparação de Avaliações -->
+        <div class="form-card">
+          <h3>📈 Comparação de Avaliações</h3>
+          <div class="comparison-controls">
+            <div class="form-group">
+              <label for="compareDate1">Primeira Avaliação</label>
+              <select id="compareDate1" class="compare-select">
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="compareDate2">Segunda Avaliação</label>
+              <select id="compareDate2" class="compare-select">
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-secondary" id="compareBtn">
+              🔍 Comparar
+            </button>
+          </div>
+          <div id="comparisonResults" class="comparison-results"></div>
+        </div>
       </section>
     </main>
 

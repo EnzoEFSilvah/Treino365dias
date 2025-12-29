@@ -266,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initWater();
   initMeals();
   initEditRecordModal();
+  initProfile();
   updateStats();
   renderWorkoutCalendar();
 });
@@ -1386,4 +1387,385 @@ function saveEditRecord() {
   }
 
   closeEditRecordModal();
+}
+
+// ==========================================
+// SISTEMA DE PERFIL E AVALIAÇÕES
+// ==========================================
+
+let assessments = Storage.get("assessments") || [];
+
+// Calcular IMC automaticamente
+function calculateBMI() {
+  const height = parseFloat(document.getElementById("userHeight").value);
+  const weight = parseFloat(document.getElementById("userWeight").value);
+
+  if (height > 0 && weight > 0) {
+    const heightInMeters = height / 100;
+    const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+    document.getElementById("bmi").value = bmi;
+  }
+}
+
+// Salvar avaliação completa
+function saveProfileAssessment() {
+  const assessmentDate = document.getElementById("assessmentDate").value;
+
+  if (!assessmentDate) {
+    alert("Por favor, selecione a data da avaliação.");
+    return;
+  }
+
+  const assessment = {
+    id: Date.now(),
+    date: assessmentDate,
+    timestamp: new Date(assessmentDate).getTime(),
+    personal: {
+      name: document.getElementById("userName").value || "",
+      age: parseInt(document.getElementById("userAge").value) || 0,
+      height: parseFloat(document.getElementById("userHeight").value) || 0,
+      weight: parseFloat(document.getElementById("userWeight").value) || 0,
+    },
+    bioimpedance: {
+      bodyFatPercent:
+        parseFloat(document.getElementById("bodyFatPercent").value) || 0,
+      muscleMassPercent:
+        parseFloat(document.getElementById("muscleMassPercent").value) || 0,
+      visceralFat:
+        parseFloat(document.getElementById("visceralFat").value) || 0,
+      bmr: parseInt(document.getElementById("bmr").value) || 0,
+      bmi: parseFloat(document.getElementById("bmi").value) || 0,
+      biologicalAge:
+        parseInt(document.getElementById("biologicalAge").value) || 0,
+    },
+    perimeters: {
+      shoulder:
+        parseFloat(document.getElementById("shoulderPerimeter").value) || 0,
+      chest: parseFloat(document.getElementById("chestPerimeter").value) || 0,
+      waist: parseFloat(document.getElementById("waistPerimeter").value) || 0,
+      abdomen:
+        parseFloat(document.getElementById("abdomenPerimeter").value) || 0,
+      hip: parseFloat(document.getElementById("hipPerimeter").value) || 0,
+      thigh: parseFloat(document.getElementById("thighPerimeter").value) || 0,
+    },
+  };
+
+  assessments.push(assessment);
+  Storage.set("assessments", assessments);
+
+  showNotification("Avaliação salva com sucesso! 💪");
+  renderAssessmentHistory();
+  updateComparisonSelects();
+  clearProfileForms();
+}
+
+// Limpar formulários após salvar
+function clearProfileForms() {
+  document.getElementById("assessmentDate").value = "";
+  // Manter dados pessoais, limpar apenas métricas
+  document.getElementById("userWeight").value = "";
+  document.getElementById("bodyFatPercent").value = "";
+  document.getElementById("muscleMassPercent").value = "";
+  document.getElementById("visceralFat").value = "";
+  document.getElementById("bmr").value = "";
+  document.getElementById("bmi").value = "";
+  document.getElementById("biologicalAge").value = "";
+  document.getElementById("shoulderPerimeter").value = "";
+  document.getElementById("chestPerimeter").value = "";
+  document.getElementById("waistPerimeter").value = "";
+  document.getElementById("abdomenPerimeter").value = "";
+  document.getElementById("hipPerimeter").value = "";
+  document.getElementById("thighPerimeter").value = "";
+}
+
+// Renderizar histórico de avaliações
+function renderAssessmentHistory() {
+  const container = document.getElementById("assessmentHistory");
+
+  if (assessments.length === 0) {
+    container.innerHTML =
+      '<p class="empty-message">Nenhuma avaliação registrada ainda.</p>';
+    return;
+  }
+
+  // Ordenar por data (mais recente primeiro)
+  const sortedAssessments = [...assessments].sort(
+    (a, b) => b.timestamp - a.timestamp
+  );
+
+  let html = '<div class="assessment-cards">';
+
+  sortedAssessments.forEach((assessment) => {
+    const dateFormatted = new Date(assessment.date).toLocaleDateString("pt-BR");
+
+    html += `
+      <div class="assessment-card">
+        <div class="assessment-header">
+          <span class="assessment-date">📅 ${dateFormatted}</span>
+          <button class="btn-delete-assessment" onclick="deleteAssessment(${assessment.id})">🗑️</button>
+        </div>
+        <div class="assessment-data">
+          <div class="data-section">
+            <h4>📋 Dados Pessoais</h4>
+            <p><strong>Peso:</strong> ${assessment.personal.weight} kg</p>
+            <p><strong>Altura:</strong> ${assessment.personal.height} cm</p>
+          </div>
+          <div class="data-section">
+            <h4>⚡ Bioimpedância</h4>
+            <p><strong>% Gordura:</strong> ${assessment.bioimpedance.bodyFatPercent}%</p>
+            <p><strong>% Massa Muscular:</strong> ${assessment.bioimpedance.muscleMassPercent}%</p>
+            <p><strong>IMC:</strong> ${assessment.bioimpedance.bmi}</p>
+          </div>
+          <div class="data-section">
+            <h4>📏 Perímetros</h4>
+            <p><strong>Cintura:</strong> ${assessment.perimeters.waist} cm</p>
+            <p><strong>Peitoral:</strong> ${assessment.perimeters.chest} cm</p>
+            <p><strong>Coxa:</strong> ${assessment.perimeters.thigh} cm</p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += "</div>";
+  container.innerHTML = html;
+}
+
+// Deletar avaliação
+function deleteAssessment(id) {
+  if (confirm("Tem certeza que deseja excluir esta avaliação?")) {
+    assessments = assessments.filter((a) => a.id !== id);
+    Storage.set("assessments", assessments);
+    renderAssessmentHistory();
+    updateComparisonSelects();
+    showNotification("Avaliação excluída!");
+  }
+}
+
+// Atualizar selects de comparação
+function updateComparisonSelects() {
+  const select1 = document.getElementById("compareDate1");
+  const select2 = document.getElementById("compareDate2");
+
+  const sortedAssessments = [...assessments].sort(
+    (a, b) => b.timestamp - a.timestamp
+  );
+
+  let options = '<option value="">Selecione...</option>';
+  sortedAssessments.forEach((assessment) => {
+    const dateFormatted = new Date(assessment.date).toLocaleDateString("pt-BR");
+    options += `<option value="${assessment.id}">${dateFormatted}</option>`;
+  });
+
+  select1.innerHTML = options;
+  select2.innerHTML = options;
+}
+
+// Comparar duas avaliações
+function compareAssessments() {
+  const id1 = parseInt(document.getElementById("compareDate1").value);
+  const id2 = parseInt(document.getElementById("compareDate2").value);
+
+  if (!id1 || !id2) {
+    alert("Selecione duas avaliações para comparar.");
+    return;
+  }
+
+  if (id1 === id2) {
+    alert("Selecione avaliações diferentes.");
+    return;
+  }
+
+  const assessment1 = assessments.find((a) => a.id === id1);
+  const assessment2 = assessments.find((a) => a.id === id2);
+
+  if (!assessment1 || !assessment2) {
+    alert("Erro ao carregar avaliações.");
+    return;
+  }
+
+  // Determinar qual é a mais antiga
+  const [older, newer] =
+    assessment1.timestamp < assessment2.timestamp
+      ? [assessment1, assessment2]
+      : [assessment2, assessment1];
+
+  const container = document.getElementById("comparisonResults");
+
+  const date1 = new Date(older.date).toLocaleDateString("pt-BR");
+  const date2 = new Date(newer.date).toLocaleDateString("pt-BR");
+
+  // Calcular diferenças
+  const weightDiff = (newer.personal.weight - older.personal.weight).toFixed(1);
+  const bodyFatDiff = (
+    newer.bioimpedance.bodyFatPercent - older.bioimpedance.bodyFatPercent
+  ).toFixed(1);
+  const muscleMassDiff = (
+    newer.bioimpedance.muscleMassPercent - older.bioimpedance.muscleMassPercent
+  ).toFixed(1);
+  const visceralFatDiff = (
+    newer.bioimpedance.visceralFat - older.bioimpedance.visceralFat
+  ).toFixed(1);
+  const bmiDiff = (newer.bioimpedance.bmi - older.bioimpedance.bmi).toFixed(1);
+  const waistDiff = (newer.perimeters.waist - older.perimeters.waist).toFixed(
+    1
+  );
+  const chestDiff = (newer.perimeters.chest - older.perimeters.chest).toFixed(
+    1
+  );
+  const thighDiff = (newer.perimeters.thigh - older.perimeters.thigh).toFixed(
+    1
+  );
+
+  // Função para formatar diferença com seta
+  const formatDiff = (diff, unit = "", inverse = false) => {
+    const numDiff = parseFloat(diff);
+    if (numDiff === 0) return `<span class="diff-neutral">0${unit}</span>`;
+
+    const isPositive = numDiff > 0;
+    const isGood = inverse ? !isPositive : isPositive;
+    const arrow = isPositive ? "↑" : "↓";
+    const cssClass = isGood ? "diff-positive" : "diff-negative";
+
+    return `<span class="${cssClass}">${arrow} ${Math.abs(
+      numDiff
+    )}${unit}</span>`;
+  };
+
+  let html = `
+    <div class="comparison-table">
+      <div class="comparison-header">
+        <div class="comparison-col">
+          <h4>📅 ${date1}</h4>
+          <span class="comparison-label">(Anterior)</span>
+        </div>
+        <div class="comparison-col">
+          <h4>Métrica</h4>
+        </div>
+        <div class="comparison-col">
+          <h4>📅 ${date2}</h4>
+          <span class="comparison-label">(Atual)</span>
+        </div>
+        <div class="comparison-col">
+          <h4>Diferença</h4>
+        </div>
+      </div>
+      
+      <div class="comparison-section">
+        <h4 class="section-title">📋 Dados Pessoais</h4>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.personal.weight} kg</div>
+          <div class="comparison-col comparison-metric">Peso</div>
+          <div class="comparison-col">${newer.personal.weight} kg</div>
+          <div class="comparison-col">${formatDiff(weightDiff, " kg")}</div>
+        </div>
+      </div>
+      
+      <div class="comparison-section">
+        <h4 class="section-title">⚡ Bioimpedância</h4>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.bioimpedance.bodyFatPercent
+          }%</div>
+          <div class="comparison-col comparison-metric">% Gordura</div>
+          <div class="comparison-col">${
+            newer.bioimpedance.bodyFatPercent
+          }%</div>
+          <div class="comparison-col">${formatDiff(
+            bodyFatDiff,
+            "%",
+            true
+          )}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.bioimpedance.muscleMassPercent
+          }%</div>
+          <div class="comparison-col comparison-metric">% Massa Muscular</div>
+          <div class="comparison-col">${
+            newer.bioimpedance.muscleMassPercent
+          }%</div>
+          <div class="comparison-col">${formatDiff(muscleMassDiff, "%")}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.bioimpedance.visceralFat}</div>
+          <div class="comparison-col comparison-metric">Gordura Visceral</div>
+          <div class="comparison-col">${newer.bioimpedance.visceralFat}</div>
+          <div class="comparison-col">${formatDiff(
+            visceralFatDiff,
+            "",
+            true
+          )}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.bioimpedance.bmi}</div>
+          <div class="comparison-col comparison-metric">IMC</div>
+          <div class="comparison-col">${newer.bioimpedance.bmi}</div>
+          <div class="comparison-col">${formatDiff(bmiDiff)}</div>
+        </div>
+      </div>
+      
+      <div class="comparison-section">
+        <h4 class="section-title">📏 Perímetros</h4>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.perimeters.chest} cm</div>
+          <div class="comparison-col comparison-metric">Peitoral</div>
+          <div class="comparison-col">${newer.perimeters.chest} cm</div>
+          <div class="comparison-col">${formatDiff(chestDiff, " cm")}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.perimeters.waist} cm</div>
+          <div class="comparison-col comparison-metric">Cintura</div>
+          <div class="comparison-col">${newer.perimeters.waist} cm</div>
+          <div class="comparison-col">${formatDiff(
+            waistDiff,
+            " cm",
+            true
+          )}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.perimeters.thigh} cm</div>
+          <div class="comparison-col comparison-metric">Coxa</div>
+          <div class="comparison-col">${newer.perimeters.thigh} cm</div>
+          <div class="comparison-col">${formatDiff(thighDiff, " cm")}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+// Carregar dados pessoais salvos (para preencher automaticamente)
+function loadPersonalData() {
+  if (assessments.length > 0) {
+    const lastAssessment = [...assessments].sort(
+      (a, b) => b.timestamp - a.timestamp
+    )[0];
+    document.getElementById("userName").value =
+      lastAssessment.personal.name || "";
+    document.getElementById("userAge").value =
+      lastAssessment.personal.age || "";
+    document.getElementById("userHeight").value =
+      lastAssessment.personal.height || "";
+  }
+}
+
+// Inicializar perfil
+function initProfile() {
+  renderAssessmentHistory();
+  updateComparisonSelects();
+  loadPersonalData();
+
+  // Event listeners
+  document
+    .getElementById("saveProfileBtn")
+    .addEventListener("click", saveProfileAssessment);
+  document
+    .getElementById("compareBtn")
+    .addEventListener("click", compareAssessments);
+
+  // Calcular IMC automaticamente quando altura ou peso mudar
+  document.getElementById("userHeight").addEventListener("input", calculateBMI);
+  document.getElementById("userWeight").addEventListener("input", calculateBMI);
 }
