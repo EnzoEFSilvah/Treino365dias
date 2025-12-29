@@ -536,13 +536,105 @@
                 />
               </div>
               <div class="form-group">
-                <label for="thighPerimeter">Coxa</label>
+                <label for="neckPerimeter">Pescoço</label>
                 <input
                   type="number"
-                  id="thighPerimeter"
+                  id="neckPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 38"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="thighRightPerimeter">Coxa Direita</label>
+                <input
+                  type="number"
+                  id="thighRightPerimeter"
                   min="0"
                   step="0.1"
                   placeholder="Ex: 58"
+                />
+              </div>
+              <div class="form-group">
+                <label for="thighLeftPerimeter">Coxa Esquerda</label>
+                <input
+                  type="number"
+                  id="thighLeftPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 57"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="armRelaxedRightPerimeter"
+                  >Braço Relaxado Direito</label
+                >
+                <input
+                  type="number"
+                  id="armRelaxedRightPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 35"
+                />
+              </div>
+              <div class="form-group">
+                <label for="armRelaxedLeftPerimeter"
+                  >Braço Relaxado Esquerdo</label
+                >
+                <input
+                  type="number"
+                  id="armRelaxedLeftPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 34"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="forearmRightPerimeter">Antebraço Direito</label>
+                <input
+                  type="number"
+                  id="forearmRightPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 28"
+                />
+              </div>
+              <div class="form-group">
+                <label for="forearmLeftPerimeter">Antebraço Esquerdo</label>
+                <input
+                  type="number"
+                  id="forearmLeftPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 27"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="calfRightPerimeter">Panturrilha Direita</label>
+                <input
+                  type="number"
+                  id="calfRightPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 38"
+                />
+              </div>
+              <div class="form-group">
+                <label for="calfLeftPerimeter">Panturrilha Esquerda</label>
+                <input
+                  type="number"
+                  id="calfLeftPerimeter"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 37"
                 />
               </div>
             </div>
@@ -551,6 +643,52 @@
               <input type="date" id="assessmentDate" required />
             </div>
           </form>
+        </div>
+
+        <!-- Fotos da Avaliação -->
+        <div class="form-card">
+          <h3>📸 Fotos da Avaliação</h3>
+          <div class="photos-form">
+            <div class="photo-upload-group">
+              <label for="photoFront" class="photo-label">
+                <span class="photo-icon">📷</span>
+                <span class="photo-text">Foto Anterior (Frente)</span>
+              </label>
+              <input
+                type="file"
+                id="photoFront"
+                accept="image/*"
+                class="photo-input"
+              />
+              <div id="photoFrontPreview" class="photo-preview"></div>
+            </div>
+            <div class="photo-upload-group">
+              <label for="photoBack" class="photo-label">
+                <span class="photo-icon">📷</span>
+                <span class="photo-text">Foto Posterior (Costas)</span>
+              </label>
+              <input
+                type="file"
+                id="photoBack"
+                accept="image/*"
+                class="photo-input"
+              />
+              <div id="photoBackPreview" class="photo-preview"></div>
+            </div>
+            <div class="photo-upload-group">
+              <label for="photoSide" class="photo-label">
+                <span class="photo-icon">📷</span>
+                <span class="photo-text">Foto Lateral Esquerda</span>
+              </label>
+              <input
+                type="file"
+                id="photoSide"
+                accept="image/*"
+                class="photo-input"
+              />
+              <div id="photoSidePreview" class="photo-preview"></div>
+            </div>
+          </div>
         </div>
 
         <div class="profile-actions">

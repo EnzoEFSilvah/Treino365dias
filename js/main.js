@@ -1395,6 +1395,59 @@ function saveEditRecord() {
 
 let assessments = Storage.get("assessments") || [];
 
+// Variáveis para armazenar dados das fotos temporariamente
+let photoFrontData = "";
+let photoBackData = "";
+let photoSideData = "";
+
+// Função para processar upload de foto
+function handlePhotoUpload(inputId, previewId, photoDataVar) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+
+  input.addEventListener("change", function (e) {
+    const file = e.target.files[0];
+
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        // Limite de 5MB
+        alert("A imagem deve ter no máximo 5MB.");
+        input.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        const imgData = event.target.result;
+
+        // Armazenar dados da foto na variável correspondente
+        if (inputId === "photoFront") photoFrontData = imgData;
+        else if (inputId === "photoBack") photoBackData = imgData;
+        else if (inputId === "photoSide") photoSideData = imgData;
+
+        // Mostrar preview
+        preview.innerHTML = `
+          <img src="${imgData}" alt="Preview" class="photo-preview-img">
+          <button type="button" class="btn-remove-photo" onclick="removePhoto('${inputId}', '${previewId}')">❌ Remover</button>
+        `;
+      };
+
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// Remover foto
+function removePhoto(inputId, previewId) {
+  document.getElementById(inputId).value = "";
+  document.getElementById(previewId).innerHTML = "";
+
+  if (inputId === "photoFront") photoFrontData = "";
+  else if (inputId === "photoBack") photoBackData = "";
+  else if (inputId === "photoSide") photoSideData = "";
+}
+
 // Calcular IMC automaticamente
 function calculateBMI() {
   const height = parseFloat(document.getElementById("userHeight").value);
@@ -1446,7 +1499,30 @@ function saveProfileAssessment() {
       abdomen:
         parseFloat(document.getElementById("abdomenPerimeter").value) || 0,
       hip: parseFloat(document.getElementById("hipPerimeter").value) || 0,
-      thigh: parseFloat(document.getElementById("thighPerimeter").value) || 0,
+      neck: parseFloat(document.getElementById("neckPerimeter").value) || 0,
+      thighRight:
+        parseFloat(document.getElementById("thighRightPerimeter").value) || 0,
+      thighLeft:
+        parseFloat(document.getElementById("thighLeftPerimeter").value) || 0,
+      armRelaxedRight:
+        parseFloat(document.getElementById("armRelaxedRightPerimeter").value) ||
+        0,
+      armRelaxedLeft:
+        parseFloat(document.getElementById("armRelaxedLeftPerimeter").value) ||
+        0,
+      forearmRight:
+        parseFloat(document.getElementById("forearmRightPerimeter").value) || 0,
+      forearmLeft:
+        parseFloat(document.getElementById("forearmLeftPerimeter").value) || 0,
+      calfRight:
+        parseFloat(document.getElementById("calfRightPerimeter").value) || 0,
+      calfLeft:
+        parseFloat(document.getElementById("calfLeftPerimeter").value) || 0,
+    },
+    photos: {
+      front: photoFrontData || "",
+      back: photoBackData || "",
+      side: photoSideData || "",
     },
   };
 
@@ -1475,7 +1551,26 @@ function clearProfileForms() {
   document.getElementById("waistPerimeter").value = "";
   document.getElementById("abdomenPerimeter").value = "";
   document.getElementById("hipPerimeter").value = "";
-  document.getElementById("thighPerimeter").value = "";
+  document.getElementById("neckPerimeter").value = "";
+  document.getElementById("thighRightPerimeter").value = "";
+  document.getElementById("thighLeftPerimeter").value = "";
+  document.getElementById("armRelaxedRightPerimeter").value = "";
+  document.getElementById("armRelaxedLeftPerimeter").value = "";
+  document.getElementById("forearmRightPerimeter").value = "";
+  document.getElementById("forearmLeftPerimeter").value = "";
+  document.getElementById("calfRightPerimeter").value = "";
+  document.getElementById("calfLeftPerimeter").value = "";
+
+  // Limpar fotos
+  document.getElementById("photoFront").value = "";
+  document.getElementById("photoBack").value = "";
+  document.getElementById("photoSide").value = "";
+  document.getElementById("photoFrontPreview").innerHTML = "";
+  document.getElementById("photoBackPreview").innerHTML = "";
+  document.getElementById("photoSidePreview").innerHTML = "";
+  photoFrontData = "";
+  photoBackData = "";
+  photoSideData = "";
 }
 
 // Renderizar histórico de avaliações
@@ -1502,7 +1597,9 @@ function renderAssessmentHistory() {
       <div class="assessment-card">
         <div class="assessment-header">
           <span class="assessment-date">📅 ${dateFormatted}</span>
-          <button class="btn-delete-assessment" onclick="deleteAssessment(${assessment.id})">🗑️</button>
+          <button class="btn-delete-assessment" onclick="deleteAssessment(${
+            assessment.id
+          })">🗑️</button>
         </div>
         <div class="assessment-data">
           <div class="data-section">
@@ -1512,17 +1609,53 @@ function renderAssessmentHistory() {
           </div>
           <div class="data-section">
             <h4>⚡ Bioimpedância</h4>
-            <p><strong>% Gordura:</strong> ${assessment.bioimpedance.bodyFatPercent}%</p>
-            <p><strong>% Massa Muscular:</strong> ${assessment.bioimpedance.muscleMassPercent}%</p>
+            <p><strong>% Gordura:</strong> ${
+              assessment.bioimpedance.bodyFatPercent
+            }%</p>
+            <p><strong>% Massa Muscular:</strong> ${
+              assessment.bioimpedance.muscleMassPercent
+            }%</p>
             <p><strong>IMC:</strong> ${assessment.bioimpedance.bmi}</p>
           </div>
           <div class="data-section">
-            <h4>📏 Perímetros</h4>
+            <h4>📏 Perímetros Principais</h4>
             <p><strong>Cintura:</strong> ${assessment.perimeters.waist} cm</p>
             <p><strong>Peitoral:</strong> ${assessment.perimeters.chest} cm</p>
-            <p><strong>Coxa:</strong> ${assessment.perimeters.thigh} cm</p>
+            <p><strong>Quadril:</strong> ${assessment.perimeters.hip} cm</p>
+            <p><strong>Pescoço:</strong> ${
+              assessment.perimeters.neck || 0
+            } cm</p>
           </div>
         </div>
+        ${
+          assessment.photos &&
+          (assessment.photos.front ||
+            assessment.photos.back ||
+            assessment.photos.side)
+            ? `
+        <div class="assessment-photos">
+          <h4>📸 Fotos da Avaliação</h4>
+          <div class="photos-grid">
+            ${
+              assessment.photos.front
+                ? `<div class="photo-item"><img src="${assessment.photos.front}" alt="Frente"><p>Anterior</p></div>`
+                : ""
+            }
+            ${
+              assessment.photos.back
+                ? `<div class="photo-item"><img src="${assessment.photos.back}" alt="Costas"><p>Posterior</p></div>`
+                : ""
+            }
+            ${
+              assessment.photos.side
+                ? `<div class="photo-item"><img src="${assessment.photos.side}" alt="Lateral"><p>Lateral Esquerda</p></div>`
+                : ""
+            }
+          </div>
+        </div>
+        `
+            : ""
+        }
       </div>
     `;
   });
@@ -1613,9 +1746,29 @@ function compareAssessments() {
   const chestDiff = (newer.perimeters.chest - older.perimeters.chest).toFixed(
     1
   );
-  const thighDiff = (newer.perimeters.thigh - older.perimeters.thigh).toFixed(
-    1
-  );
+  const neckDiff = (
+    (newer.perimeters.neck || 0) - (older.perimeters.neck || 0)
+  ).toFixed(1);
+  const thighRightDiff = (
+    (newer.perimeters.thighRight || 0) - (older.perimeters.thighRight || 0)
+  ).toFixed(1);
+  const thighLeftDiff = (
+    (newer.perimeters.thighLeft || 0) - (older.perimeters.thighLeft || 0)
+  ).toFixed(1);
+  const armRelaxedRightDiff = (
+    (newer.perimeters.armRelaxedRight || 0) -
+    (older.perimeters.armRelaxedRight || 0)
+  ).toFixed(1);
+  const armRelaxedLeftDiff = (
+    (newer.perimeters.armRelaxedLeft || 0) -
+    (older.perimeters.armRelaxedLeft || 0)
+  ).toFixed(1);
+  const calfRightDiff = (
+    (newer.perimeters.calfRight || 0) - (older.perimeters.calfRight || 0)
+  ).toFixed(1);
+  const calfLeftDiff = (
+    (newer.perimeters.calfLeft || 0) - (older.perimeters.calfLeft || 0)
+  ).toFixed(1);
 
   // Função para formatar diferença com seta
   const formatDiff = (diff, unit = "", inverse = false) => {
@@ -1724,10 +1877,72 @@ function compareAssessments() {
           )}</div>
         </div>
         <div class="comparison-row">
-          <div class="comparison-col">${older.perimeters.thigh} cm</div>
-          <div class="comparison-col comparison-metric">Coxa</div>
-          <div class="comparison-col">${newer.perimeters.thigh} cm</div>
-          <div class="comparison-col">${formatDiff(thighDiff, " cm")}</div>
+          <div class="comparison-col">${older.perimeters.neck || 0} cm</div>
+          <div class="comparison-col comparison-metric">Pescoço</div>
+          <div class="comparison-col">${newer.perimeters.neck || 0} cm</div>
+          <div class="comparison-col">${formatDiff(neckDiff, " cm")}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.perimeters.thighRight || 0
+          } cm</div>
+          <div class="comparison-col comparison-metric">Coxa Direita</div>
+          <div class="comparison-col">${
+            newer.perimeters.thighRight || 0
+          } cm</div>
+          <div class="comparison-col">${formatDiff(thighRightDiff, " cm")}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.perimeters.thighLeft || 0
+          } cm</div>
+          <div class="comparison-col comparison-metric">Coxa Esquerda</div>
+          <div class="comparison-col">${
+            newer.perimeters.thighLeft || 0
+          } cm</div>
+          <div class="comparison-col">${formatDiff(thighLeftDiff, " cm")}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.perimeters.armRelaxedRight || 0
+          } cm</div>
+          <div class="comparison-col comparison-metric">Braço Relaxado Direito</div>
+          <div class="comparison-col">${
+            newer.perimeters.armRelaxedRight || 0
+          } cm</div>
+          <div class="comparison-col">${formatDiff(
+            armRelaxedRightDiff,
+            " cm"
+          )}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.perimeters.armRelaxedLeft || 0
+          } cm</div>
+          <div class="comparison-col comparison-metric">Braço Relaxado Esquerdo</div>
+          <div class="comparison-col">${
+            newer.perimeters.armRelaxedLeft || 0
+          } cm</div>
+          <div class="comparison-col">${formatDiff(
+            armRelaxedLeftDiff,
+            " cm"
+          )}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${
+            older.perimeters.calfRight || 0
+          } cm</div>
+          <div class="comparison-col comparison-metric">Panturrilha Direita</div>
+          <div class="comparison-col">${
+            newer.perimeters.calfRight || 0
+          } cm</div>
+          <div class="comparison-col">${formatDiff(calfRightDiff, " cm")}</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-col">${older.perimeters.calfLeft || 0} cm</div>
+          <div class="comparison-col comparison-metric">Panturrilha Esquerda</div>
+          <div class="comparison-col">${newer.perimeters.calfLeft || 0} cm</div>
+          <div class="comparison-col">${formatDiff(calfLeftDiff, " cm")}</div>
         </div>
       </div>
     </div>
@@ -1768,4 +1983,9 @@ function initProfile() {
   // Calcular IMC automaticamente quando altura ou peso mudar
   document.getElementById("userHeight").addEventListener("input", calculateBMI);
   document.getElementById("userWeight").addEventListener("input", calculateBMI);
+
+  // Inicializar handlers de upload de fotos
+  handlePhotoUpload("photoFront", "photoFrontPreview");
+  handlePhotoUpload("photoBack", "photoBackPreview");
+  handlePhotoUpload("photoSide", "photoSidePreview");
 }
