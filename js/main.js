@@ -202,6 +202,9 @@ let dailyWorkoutStatus =
 let completedWorkoutDates =
   JSON.parse(localStorage.getItem("completedWorkoutDates")) || [];
 
+// Estado de edição de registros de histórico
+let currentEdit = null; // { type: 'workout' | 'water' | 'meal', id: number }
+
 // Inicialização
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
@@ -209,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initWorkouts();
   initWater();
   initMeals();
+  initEditRecordModal();
   updateStats();
   renderWorkoutCalendar();
 });
@@ -660,6 +664,9 @@ function renderWorkouts() {
                     )}</div>
                 </div>
                 <div class="record-actions">
+                    <button class="btn-edit" onclick="openEditRecordModal('workout', ${
+                      workout.id
+                    })">✏️ Editar</button>
                     <button class="btn-delete" onclick="deleteWorkout(${
                       workout.id
                     })">🗑️ Excluir</button>
@@ -763,6 +770,9 @@ function renderWaterRecords() {
                     )}</div>
                 </div>
                 <div class="record-actions">
+                    <button class="btn-edit" onclick="openEditRecordModal('water', ${
+                      record.id
+                    })">✏️ Editar</button>
                     <button class="btn-delete" onclick="deleteWaterRecord(${
                       record.id
                     })">🗑️ Excluir</button>
@@ -797,6 +807,8 @@ function initMeals() {
       description: document.getElementById("mealDescription").value,
       calories: parseInt(document.getElementById("mealCalories").value) || 0,
       protein: parseInt(document.getElementById("mealProtein").value) || 0,
+      carbs: parseInt(document.getElementById("mealCarbs")?.value) || 0,
+      fat: parseInt(document.getElementById("mealFat")?.value) || 0,
       date: new Date().toISOString(),
     };
 
@@ -848,10 +860,19 @@ function renderMeals() {
                             ? `<br>🥩 ${meal.protein}g de proteína`
                             : ""
                         }
+                        ${
+                          meal.carbs
+                            ? `<br>🍚 ${meal.carbs}g de carboidratos`
+                            : ""
+                        }
+                        ${meal.fat ? `<br>🧈 ${meal.fat}g de gorduras` : ""}
                     </div>
                     <div class="record-time">${formatDateTime(meal.date)}</div>
                 </div>
                 <div class="record-actions">
+                    <button class="btn-edit" onclick="openEditRecordModal('meal', ${
+                      meal.id
+                    })">✏️ Editar</button>
                     <button class="btn-delete" onclick="deleteMeal(${
                       meal.id
                     })">🗑️ Excluir</button>
@@ -886,14 +907,24 @@ function updateNutritionGoals() {
     0
   );
   const totalProtein = todayMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
+  const totalCarbs = todayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+  const totalFat = todayMeals.reduce((sum, m) => sum + (m.fat || 0), 0);
 
   // Meta de calorias: 2600-2800 (usando 2700 como média)
   const caloriesTarget = 2700;
   const caloriesPercent = Math.min((totalCalories / caloriesTarget) * 100, 100);
 
-  // Meta de proteína: 130-140g (usando 135 como média)
-  const proteinTarget = 135;
+  // Meta de proteína: ~140g
+  const proteinTarget = 140;
   const proteinPercent = Math.min((totalProtein / proteinTarget) * 100, 100);
+
+  // Meta de carboidratos: 380-400g (usar 390 como média)
+  const carbsTarget = 390;
+  const carbsPercent = Math.min((totalCarbs / carbsTarget) * 100, 100);
+
+  // Meta de gorduras: 65-75g (usar 70 como média)
+  const fatTarget = 70;
+  const fatPercent = Math.min((totalFat / fatTarget) * 100, 100);
 
   // Atualizar displays
   document.getElementById("currentCalories").textContent = totalCalories;
@@ -902,6 +933,20 @@ function updateNutritionGoals() {
 
   document.getElementById("currentProtein").textContent = totalProtein;
   document.getElementById("proteinProgress").style.width = proteinPercent + "%";
+
+  const currentCarbsEl = document.getElementById("currentCarbs");
+  const carbsProgressEl = document.getElementById("carbsProgress");
+  if (currentCarbsEl && carbsProgressEl) {
+    currentCarbsEl.textContent = totalCarbs;
+    carbsProgressEl.style.width = carbsPercent + "%";
+  }
+
+  const currentFatEl = document.getElementById("currentFat");
+  const fatProgressEl = document.getElementById("fatProgress");
+  if (currentFatEl && fatProgressEl) {
+    currentFatEl.textContent = totalFat;
+    fatProgressEl.style.width = fatPercent + "%";
+  }
 
   // Atualizar água na seção de alimentação
   const todayWater = waterRecords
@@ -1013,3 +1058,202 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ==========================
+// Modal de edição de histórico
+// ==========================
+function initEditRecordModal() {
+  const modal = document.getElementById("editRecordModal");
+  const closeBtn = document.getElementById("editRecordClose");
+  const cancelBtn = document.getElementById("editRecordCancel");
+  const saveBtn = document.getElementById("editRecordSave");
+
+  closeBtn.addEventListener("click", closeEditRecordModal);
+  cancelBtn.addEventListener("click", closeEditRecordModal);
+  saveBtn.addEventListener("click", saveEditRecord);
+
+  // Fechar ao clicar fora do conteúdo
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closeEditRecordModal();
+    }
+  });
+}
+
+function openEditRecordModal(type, id) {
+  currentEdit = { type, id };
+  const title = document.getElementById("editRecordTitle");
+  const container = document.getElementById("editRecordFormContainer");
+
+  if (type === "workout") {
+    const item = workouts.find((w) => w.id === id);
+    title.textContent = "Editar Treino";
+    container.innerHTML = `
+      <div class="form-group">
+        <label for="editWorkoutType">Tipo de Treino</label>
+        <select id="editWorkoutType" required>
+          <option value="Musculação">Musculação</option>
+          <option value="Cardio">Cardio</option>
+          <option value="Yoga">Yoga</option>
+          <option value="Natação">Natação</option>
+          <option value="Corrida">Corrida</option>
+          <option value="Ciclismo">Ciclismo</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editWorkoutDuration">Duração (minutos)</label>
+        <input type="number" id="editWorkoutDuration" min="1" required />
+      </div>
+      <div class="form-group">
+        <label for="editWorkoutNotes">Observações</label>
+        <textarea id="editWorkoutNotes" rows="3"></textarea>
+      </div>
+    `;
+    // Preencher valores
+    document.getElementById("editWorkoutType").value = item.type || "";
+    document.getElementById("editWorkoutDuration").value = item.duration || 0;
+    document.getElementById("editWorkoutNotes").value = item.notes || "";
+  } else if (type === "water") {
+    const item = waterRecords.find((r) => r.id === id);
+    title.textContent = "Editar Consumo de Água";
+    container.innerHTML = `
+      <div class="form-group">
+        <label for="editWaterAmount">Quantidade (ml)</label>
+        <input type="number" id="editWaterAmount" min="1" required />
+      </div>
+    `;
+    document.getElementById("editWaterAmount").value = item.amount || 0;
+  } else if (type === "meal") {
+    const item = meals.find((m) => m.id === id);
+    title.textContent = "Editar Refeição";
+    container.innerHTML = `
+      <div class="form-group">
+        <label for="editMealType">Tipo de Refeição</label>
+        <select id="editMealType" required>
+          <option value="Café da Manhã">Café da Manhã</option>
+          <option value="Lanche da Manhã">Lanche da Manhã</option>
+          <option value="Almoço">Almoço</option>
+          <option value="Lanche da Tarde">Lanche da Tarde</option>
+          <option value="Jantar">Jantar</option>
+          <option value="Ceia">Ceia</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editMealDescription">Descrição</label>
+        <textarea id="editMealDescription" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="editMealCalories">Calorias</label>
+        <input type="number" id="editMealCalories" min="0" />
+      </div>
+      <div class="form-group">
+        <label for="editMealProtein">Proteína (gramas)</label>
+        <input type="number" id="editMealProtein" min="0" />
+      </div>
+      <div class="form-group">
+        <label for="editMealCarbs">Carboidratos (gramas)</label>
+        <input type="number" id="editMealCarbs" min="0" />
+      </div>
+      <div class="form-group">
+        <label for="editMealFat">Gorduras (gramas)</label>
+        <input type="number" id="editMealFat" min="0" />
+      </div>
+    `;
+    document.getElementById("editMealType").value = item.type || "";
+    document.getElementById("editMealDescription").value =
+      item.description || "";
+    document.getElementById("editMealCalories").value = item.calories || 0;
+    document.getElementById("editMealProtein").value = item.protein || 0;
+    document.getElementById("editMealCarbs").value = item.carbs || 0;
+    document.getElementById("editMealFat").value = item.fat || 0;
+  }
+
+  document.getElementById("editRecordModal").classList.add("active");
+}
+
+function closeEditRecordModal() {
+  const modal = document.getElementById("editRecordModal");
+  modal.classList.remove("active");
+  currentEdit = null;
+}
+
+function saveEditRecord() {
+  if (!currentEdit) return;
+  const { type, id } = currentEdit;
+
+  if (type === "workout") {
+    const idx = workouts.findIndex((w) => w.id === id);
+    if (idx >= 0) {
+      const typeVal = document.getElementById("editWorkoutType").value;
+      const durationVal = parseInt(
+        document.getElementById("editWorkoutDuration").value
+      );
+      const notesVal = document.getElementById("editWorkoutNotes").value;
+
+      if (!typeVal || !durationVal || durationVal <= 0) {
+        alert("Preencha tipo e duração válidos.");
+        return;
+      }
+
+      workouts[idx].type = typeVal;
+      workouts[idx].duration = durationVal;
+      workouts[idx].notes = notesVal;
+      Storage.set("workouts", workouts);
+      renderWorkouts();
+      updateStats();
+      showNotification("Treino atualizado! ✅");
+    }
+  } else if (type === "water") {
+    const idx = waterRecords.findIndex((r) => r.id === id);
+    if (idx >= 0) {
+      const amountVal = parseInt(
+        document.getElementById("editWaterAmount").value
+      );
+      if (!amountVal || amountVal <= 0) {
+        alert("Informe uma quantidade válida em ml.");
+        return;
+      }
+      waterRecords[idx].amount = amountVal;
+      Storage.set("waterRecords", waterRecords);
+      renderWaterRecords();
+      updateWaterProgress();
+      updateStats();
+      updateNutritionGoals();
+      showNotification("Registro de água atualizado! 💧");
+    }
+  } else if (type === "meal") {
+    const idx = meals.findIndex((m) => m.id === id);
+    if (idx >= 0) {
+      const typeVal = document.getElementById("editMealType").value;
+      const descVal = document.getElementById("editMealDescription").value;
+      const calVal =
+        parseInt(document.getElementById("editMealCalories").value) || 0;
+      const protVal =
+        parseInt(document.getElementById("editMealProtein").value) || 0;
+      const carbsVal =
+        parseInt(document.getElementById("editMealCarbs").value) || 0;
+      const fatVal =
+        parseInt(document.getElementById("editMealFat").value) || 0;
+
+      if (!typeVal || !descVal) {
+        alert("Tipo e descrição são obrigatórios.");
+        return;
+      }
+
+      meals[idx].type = typeVal;
+      meals[idx].description = descVal;
+      meals[idx].calories = calVal;
+      meals[idx].protein = protVal;
+      meals[idx].carbs = carbsVal;
+      meals[idx].fat = fatVal;
+      Storage.set("meals", meals);
+      renderMeals();
+      updateStats();
+      updateNutritionGoals();
+      showNotification("Refeição atualizada! 🍽️");
+    }
+  }
+
+  closeEditRecordModal();
+}

@@ -389,6 +389,21 @@ main {
   gap: 0.5rem;
 }
 
+.record-actions .btn-edit {
+  background: #ff9800;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.record-actions .btn-edit:hover {
+  background: #f57c00;
+}
+
 .btn-delete {
   background: #f44336;
   color: white;

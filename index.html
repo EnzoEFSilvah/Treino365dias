@@ -235,7 +235,43 @@
               <div class="goal-numbers">
                 <span class="current-value" id="currentProtein">0</span>
                 <span class="separator">/</span>
-                <span class="target-value">130-140</span>
+                <span class="target-value">140</span>
+                <span class="unit">g</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-icon">🍚</span>
+              <span class="goal-label">Carboidratos</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-bar">
+                <div id="carbsProgress" class="progress-fill"></div>
+              </div>
+              <div class="goal-numbers">
+                <span class="current-value" id="currentCarbs">0</span>
+                <span class="separator">/</span>
+                <span class="target-value">380-400</span>
+                <span class="unit">g</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-icon">🧈</span>
+              <span class="goal-label">Gorduras</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-bar">
+                <div id="fatProgress" class="progress-fill"></div>
+              </div>
+              <div class="goal-numbers">
+                <span class="current-value" id="currentFat">0</span>
+                <span class="separator">/</span>
+                <span class="target-value">65-75</span>
                 <span class="unit">g</span>
               </div>
             </div>
@@ -303,6 +339,14 @@
               required
             />
           </div>
+          <div class="form-group">
+            <label for="mealCarbs">Carboidratos (gramas)</label>
+            <input type="number" id="mealCarbs" min="0" placeholder="Ex: 60" />
+          </div>
+          <div class="form-group">
+            <label for="mealFat">Gorduras (gramas)</label>
+            <input type="number" id="mealFat" min="0" placeholder="Ex: 15" />
+          </div>
           <button type="submit" class="btn btn-primary">
             Adicionar Refeição
           </button>
@@ -312,6 +356,27 @@
         <div id="mealList" class="records-list"></div>
       </section>
     </main>
+
+    <!-- Modal genérico para edição de registros (treino, água, refeição) -->
+    <div id="editRecordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="editRecordTitle">Editar Registro</h3>
+          <button class="modal-close" id="editRecordClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="editRecordForm" class="edit-record-form">
+            <div id="editRecordFormContainer"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="editRecordCancel">
+            Cancelar
+          </button>
+          <button class="btn btn-primary" id="editRecordSave">Salvar</button>
+        </div>
+      </div>
+    </div>
 
     <footer>
       <div class="container">
