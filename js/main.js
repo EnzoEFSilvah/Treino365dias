@@ -534,9 +534,13 @@ function renderEditExercises() {
   editList.innerHTML = currentPlan.exercises
     .map(
       (exercise, index) => `
-    <div class="edit-exercise-item" data-index="${index}">
+    <div class="edit-exercise-item" data-index="${index}" draggable="true"
+         ondragstart="handleExerciseDragStart(event, ${index})"
+         ondragover="handleExerciseDragOver(event, ${index})"
+         ondragleave="handleExerciseDragLeave(event, ${index})"
+         ondrop="handleExerciseDrop(event, ${index})">
       <div class="edit-exercise-header">
-        <div class="edit-exercise-number">Exercício ${index + 1}</div>
+        <div class="edit-exercise-number"><span class="drag-handle" title="Arraste para reordenar">↕️</span> Exercício ${index + 1}</div>
         <button class="btn-remove-exercise" onclick="removeExercise(${index})">🗑️ Remover</button>
       </div>
       <div class="edit-exercise-inputs">
@@ -557,6 +561,52 @@ function renderEditExercises() {
   `
     )
     .join("");
+}
+
+// Estado para drag-and-drop
+let exerciseDragIndex = null;
+
+function handleExerciseDragStart(e, index) {
+  exerciseDragIndex = index;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  }
+}
+
+function handleExerciseDragOver(e, index) {
+  e.preventDefault();
+  const el = e.currentTarget;
+  if (el && !el.classList.contains("drag-over")) {
+    el.classList.add("drag-over");
+  }
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+}
+
+function handleExerciseDragLeave(e, index) {
+  const el = e.currentTarget;
+  if (el) el.classList.remove("drag-over");
+}
+
+function handleExerciseDrop(e, targetIndex) {
+  e.preventDefault();
+  const el = e.currentTarget;
+  if (el) el.classList.remove("drag-over");
+
+  const sourceStr = e.dataTransfer ? e.dataTransfer.getData("text/plain") : null;
+  const sourceIndex = sourceStr !== null && sourceStr !== "" ? parseInt(sourceStr, 10) : exerciseDragIndex;
+  if (Number.isNaN(sourceIndex) || sourceIndex === null || sourceIndex === targetIndex) return;
+
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const list = workoutPlans[dayOfWeek].exercises;
+  if (!Array.isArray(list) || sourceIndex < 0 || sourceIndex >= list.length || targetIndex < 0 || targetIndex >= list.length) return;
+
+  const [moved] = list.splice(sourceIndex, 1);
+  list.splice(targetIndex, 0, moved);
+
+  // Re-render para atualizar índices e UI
+  renderEditExercises();
 }
 
 function updateExerciseName(index, value) {

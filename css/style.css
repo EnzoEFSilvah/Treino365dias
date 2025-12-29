@@ -657,11 +657,21 @@ main {
   border-left: 4px solid #667eea;
 }
 
+.edit-exercise-item.drag-over {
+  border: 2px dashed #667eea;
+  background: #eef0ff;
+}
+
 .edit-exercise-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
+}
+
+.drag-handle {
+  cursor: grab;
+  margin-right: 8px;
 }
 
 .edit-exercise-number {
