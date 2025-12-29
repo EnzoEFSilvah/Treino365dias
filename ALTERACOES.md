@@ -9,15 +9,18 @@ Foram implementadas funcionalidades para **registrar quantidade de calorias gast
 ## 🎯 Alterações Detalhadas
 
 ### 1. **HTML - Nova Modal de Conclusão de Treino**
+
 **Arquivo:** `index.html`
 
 Adicionada uma nova modal (`completeWorkoutModal`) com os seguintes campos:
+
 - ⏱️ **Tempo de Treino** (em minutos)
 - 🔥 **Calorias Gastas** (em kcal)
 
 Localização: Após o modal de edição do treino (linha ~101)
 
 **Campos do formulário:**
+
 ```html
 <div id="completeWorkoutModal" class="modal">
   <input type="number" id="workoutTime" min="1" required />
@@ -28,21 +31,26 @@ Localização: Após o modal de edição do treino (linha ~101)
 ---
 
 ### 2. **JavaScript - Novas Funções**
+
 **Arquivo:** `main.js`
 
 #### a) **Função `completeWorkout()` - MODIFICADA**
+
 - Agora abre a modal de conclusão ao invés de completar direto
 - Valida se há exercícios antes de permitir conclusão
 
 #### b) **Função `openCompleteWorkoutModal()`** - NOVA
+
 - Abre a modal de conclusão do treino
 - Foca automaticamente no campo de tempo
 
 #### c) **Função `closeCompleteWorkoutModal()`** - NOVA
+
 - Fecha a modal de conclusão
 - Limpa o formulário
 
 #### d) **Função `saveCompleteWorkout()`** - NOVA
+
 - Valida os dados de tempo e calorias
 - Armazena as informações no localStorage
 - Adiciona dados à data concluída:
@@ -54,26 +62,37 @@ Localização: Após o modal de edição do treino (linha ~101)
 ---
 
 ### 3. **Event Listeners Adicionados**
+
 **Arquivo:** `main.js` - função `initDailyWorkout()`
 
 Novos listeners para a modal:
+
 ```javascript
-document.getElementById("completeWorkoutClose").addEventListener("click", closeCompleteWorkoutModal);
-document.getElementById("cancelCompleteWorkoutBtn").addEventListener("click", closeCompleteWorkoutModal);
-document.getElementById("confirmCompleteWorkoutBtn").addEventListener("click", saveCompleteWorkout);
+document
+  .getElementById("completeWorkoutClose")
+  .addEventListener("click", closeCompleteWorkoutModal);
+document
+  .getElementById("cancelCompleteWorkoutBtn")
+  .addEventListener("click", closeCompleteWorkoutModal);
+document
+  .getElementById("confirmCompleteWorkoutBtn")
+  .addEventListener("click", saveCompleteWorkout);
 ```
 
 ---
 
 ### 4. **Calendário - Exibição de Informações**
+
 **Arquivo:** `main.js` - função `renderWorkoutCalendar()`
 
 Melhorado o tooltip do calendário para mostrar:
+
 - Data do treino
 - ⏱️ Tempo de treino (minutos)
 - 🔥 Calorias gastas (kcal)
 
 **Exemplo de tooltip:**
+
 ```
 29/12/2025 | ⏱️ 60min | 🔥 500kcal
 ```
@@ -81,9 +100,11 @@ Melhorado o tooltip do calendário para mostrar:
 ---
 
 ### 5. **Armazenamento Local**
+
 **Arquivo:** `main.js`
 
 As informações são armazenadas no `dailyWorkoutStatus`:
+
 ```javascript
 dailyWorkoutStatus[dateKey] = {
   exercises: [...],
@@ -98,8 +119,9 @@ dailyWorkoutStatus[dateKey] = {
 ## 🎨 Interface da Modal
 
 ### Visual:
+
 - **Header:** "📊 Registrar Conclusão do Treino"
-- **Campos:** 
+- **Campos:**
   - ⏱️ Tempo de Treino (obrigatório)
   - 🔥 Calorias Gastas (obrigatório)
 - **Botões:**
@@ -127,6 +149,7 @@ dailyWorkoutStatus[dateKey] = {
 ## 📊 Dados Armazenados
 
 Os dados de cada treino concluído ficam disponíveis em:
+
 - `dailyWorkoutStatus[data].duration` - tempo em minutos
 - `dailyWorkoutStatus[data].calories` - calorias em kcal
 - Visíveis no **tooltip do calendário** ao passar o mouse sobre datas concluídas

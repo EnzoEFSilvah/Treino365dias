@@ -203,6 +203,68 @@
 
         <h3>Histórico de Treinos</h3>
         <div id="workoutList" class="records-list"></div>
+
+        <!-- Modal de Visualização de Dados do Dia -->
+        <div id="dayDataModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>📊 Dados do Dia - <span id="modalDayDate"></span></h3>
+              <button class="modal-close" id="dayDataClose">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div id="dayDataContent">
+                <!-- Conteúdo será preenchido dinamicamente -->
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" id="shareDayDataBtn">
+                📤 Compartilhar
+              </button>
+              <button class="btn btn-secondary" id="closeDayDataBtn">
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de Compartilhamento -->
+        <div id="shareModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>📸 Compartilhar Dados do Dia</h3>
+              <button class="modal-close" id="shareModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="share-preview" id="sharePreview">
+                <!-- Preview será preenchido dinamicamente -->
+              </div>
+              <div class="form-group">
+                <label for="shareImage">📷 Adicionar Imagem</label>
+                <input
+                  type="file"
+                  id="shareImage"
+                  accept="image/*"
+                  class="photo-input"
+                />
+              </div>
+              <div
+                id="imagePreviewContainer"
+                class="image-preview-container"
+              ></div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" id="cancelShareBtn">
+                Cancelar
+              </button>
+              <button class="btn btn-primary" id="downloadShareBtn">
+                ⬇️ Baixar Imagem
+              </button>
+              <button class="btn btn-primary" id="copyShareBtn">
+                📋 Copiar Texto
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Seção de Água -->

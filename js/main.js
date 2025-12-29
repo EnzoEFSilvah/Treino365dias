@@ -680,7 +680,7 @@ function renderWorkoutCalendar() {
       if (isCompleted) classes += " completed";
 
       let titleText = date.toLocaleDateString("pt-BR");
-      
+
       // Adicionar informações de tempo e calorias ao título se treino foi concluído
       if (isCompleted && dailyWorkoutStatus[dateKey]) {
         const workoutData = dailyWorkoutStatus[dateKey];
@@ -712,6 +712,37 @@ function renderWorkoutCalendar() {
 
   document.getElementById("yearWorkoutCount").textContent = yearCount;
   document.getElementById("monthWorkoutCount").textContent = monthCount;
+
+  // Adicionar listeners de clique aos dias do calendário
+  const calendarDays = document.querySelectorAll(".calendar-day.completed");
+  calendarDays.forEach((day) => {
+    day.addEventListener("click", (e) => {
+      const dayText = e.target.textContent;
+      const month = e.target.closest(".calendar-month");
+      const monthName = month.querySelector(".calendar-month-name").textContent;
+
+      // Encontrar a data a partir do mês e dia
+      const monthIndex = [
+        "Jan",
+        "Fev",
+        "Mar",
+        "Abr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Set",
+        "Out",
+        "Nov",
+        "Dez",
+      ].indexOf(monthName);
+
+      const dateKey = `2025-${String(monthIndex + 1).padStart(2, "0")}-${String(
+        dayText
+      ).padStart(2, "0")}`;
+      openDayDataModal(dateKey);
+    });
+  });
 }
 
 // SEÇÃO DE TREINOS
@@ -2148,11 +2179,444 @@ function loadPersonalData() {
   }
 }
 
+// ==========================================
+// MODAL DE DADOS DO DIA
+// ==========================================
+
+let currentDayShareData = null;
+let shareImageData = null;
+
+function openDayDataModal(dateKey) {
+  const dateObj = new Date(dateKey + "T12:00:00");
+  const dayWorkoutStatus = dailyWorkoutStatus[dateKey];
+  const dayMeals = meals.filter(
+    (m) => new Date(m.date).toISOString().split("T")[0] === dateKey
+  );
+  const dayWater = waterRecords.filter(
+    (w) => new Date(w.date).toISOString().split("T")[0] === dateKey
+  );
+
+  // Armazenar dados para compartilhamento
+  currentDayShareData = {
+    dateKey,
+    dateObj,
+    workoutStatus: dayWorkoutStatus,
+    meals: dayMeals,
+    water: dayWater,
+  };
+
+  const contentContainer = document.getElementById("dayDataContent");
+  let html = "";
+
+  // Seção de Treino
+  html += `
+    <div class="day-section">
+      <h4>💪 Treino do Dia</h4>
+  `;
+
+  if (dayWorkoutStatus && dayWorkoutStatus.completed) {
+    html += `
+      <div class="day-info-item">
+        <span class="info-label">⏱️ Tempo de Treino:</span>
+        <span class="info-value">${
+          dayWorkoutStatus.duration || 0
+        } minutos</span>
+      </div>
+      <div class="day-info-item">
+        <span class="info-label">🔥 Calorias Gastas:</span>
+        <span class="info-value">${dayWorkoutStatus.calories || 0} kcal</span>
+      </div>
+      <div class="day-exercises">
+        <h5>Exercícios:</h5>
+    `;
+
+    if (dayWorkoutStatus.exercises && dayWorkoutStatus.exercises.length > 0) {
+      dayWorkoutStatus.exercises.forEach((ex) => {
+        html += `
+          <div class="exercise-row">
+            <span class="exercise-check">${ex.completed ? "✅" : "❌"}</span>
+            <span class="exercise-name">${ex.name}</span>
+            <span class="exercise-details">${ex.details}</span>
+          </div>
+        `;
+      });
+    }
+
+    html += `
+        </div>
+    `;
+  } else {
+    html += `<p class="empty-info">Sem treino neste dia</p>`;
+  }
+
+  html += `</div>`;
+
+  // Seção de Água
+  html += `
+    <div class="day-section">
+      <h4>💧 Consumo de Água</h4>
+  `;
+
+  if (dayWater.length > 0) {
+    const totalWater = dayWater.reduce((sum, w) => sum + w.amount, 0);
+    html += `
+      <div class="day-info-item">
+        <span class="info-label">Total:</span>
+        <span class="info-value">${totalWater} ml</span>
+      </div>
+      <div class="water-records">
+    `;
+
+    dayWater.forEach((w) => {
+      const time = new Date(w.date).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      html += `
+        <div class="water-record-item">
+          <span>${time}</span>
+          <span class="amount">+${w.amount}ml</span>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  } else {
+    html += `<p class="empty-info">Sem registros de água</p>`;
+  }
+
+  html += `</div>`;
+
+  // Seção de Alimentação
+  html += `
+    <div class="day-section">
+      <h4>🍽️ Alimentação</h4>
+  `;
+
+  if (dayMeals.length > 0) {
+    const totalCalories = dayMeals.reduce(
+      (sum, m) => sum + (m.calories || 0),
+      0
+    );
+    const totalProtein = dayMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
+    const totalCarbs = dayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+    const totalFat = dayMeals.reduce((sum, m) => sum + (m.fat || 0), 0);
+
+    html += `
+      <div class="nutrition-summary">
+        <div class="nutrition-item">
+          <span class="nutrition-label">🔥 Calorias:</span>
+          <span class="nutrition-value">${totalCalories} kcal</span>
+        </div>
+        <div class="nutrition-item">
+          <span class="nutrition-label">🥩 Proteína:</span>
+          <span class="nutrition-value">${totalProtein}g</span>
+        </div>
+        <div class="nutrition-item">
+          <span class="nutrition-label">🍚 Carbs:</span>
+          <span class="nutrition-value">${totalCarbs}g</span>
+        </div>
+        <div class="nutrition-item">
+          <span class="nutrition-label">🧈 Gordura:</span>
+          <span class="nutrition-value">${totalFat}g</span>
+        </div>
+      </div>
+      <div class="meals-list">
+    `;
+
+    dayMeals.forEach((meal) => {
+      const time = new Date(meal.date).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      html += `
+        <div class="meal-record-item">
+          <div class="meal-header">
+            <span class="meal-type">${meal.type}</span>
+            <span class="meal-time">${time}</span>
+          </div>
+          <p class="meal-description">${meal.description}</p>
+          ${
+            meal.calories || meal.protein || meal.carbs || meal.fat
+              ? `
+              <div class="meal-macros-mini">
+                ${meal.calories ? `<span>🔥 ${meal.calories}kcal</span>` : ""}
+                ${meal.protein ? `<span>🥩 ${meal.protein}g</span>` : ""}
+                ${meal.carbs ? `<span>🍚 ${meal.carbs}g</span>` : ""}
+                ${meal.fat ? `<span>🧈 ${meal.fat}g</span>` : ""}
+              </div>
+            `
+              : ""
+          }
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  } else {
+    html += `<p class="empty-info">Sem registros de alimentação</p>`;
+  }
+
+  html += `</div>`;
+
+  contentContainer.innerHTML = html;
+  document.getElementById("modalDayDate").textContent =
+    dateObj.toLocaleDateString("pt-BR");
+  document.getElementById("dayDataModal").classList.add("active");
+}
+
+function closeDayDataModal() {
+  document.getElementById("dayDataModal").classList.remove("active");
+  currentDayShareData = null;
+  shareImageData = null;
+}
+
+// ==========================================
+// MODAL DE COMPARTILHAMENTO
+// ==========================================
+
+function openShareModal() {
+  if (!currentDayShareData) {
+    alert("Dados do dia não carregados");
+    return;
+  }
+
+  const { dateObj, workoutStatus, water, meals } = currentDayShareData;
+  const dateStr = dateObj.toLocaleDateString("pt-BR");
+
+  // Criar preview de compartilhamento
+  let previewHTML = `
+    <div class="share-content">
+      <div class="share-header">
+        <h3>📊 Resumo do Dia - ${dateStr}</h3>
+        <p class="share-subtitle">Desafio 365 Dias</p>
+      </div>
+
+      <div class="share-section">
+        <h4>💪 Treino</h4>
+  `;
+
+  if (workoutStatus && workoutStatus.completed) {
+    previewHTML += `
+      <div class="share-data">
+        <div class="share-item">
+          <span class="share-icon">⏱️</span>
+          <span class="share-text">Tempo: ${workoutStatus.duration}min</span>
+        </div>
+        <div class="share-item">
+          <span class="share-icon">🔥</span>
+          <span class="share-text">Calorias: ${workoutStatus.calories}kcal</span>
+        </div>
+      </div>
+    `;
+  } else {
+    previewHTML += `<p>Sem treino registrado</p>`;
+  }
+
+  previewHTML += `</div>`;
+
+  // Água
+  const totalWater = water.reduce((sum, w) => sum + w.amount, 0);
+  previewHTML += `
+    <div class="share-section">
+      <h4>💧 Água</h4>
+      <div class="share-data">
+        <div class="share-item">
+          <span class="share-icon">💧</span>
+          <span class="share-text">Total: ${totalWater}ml</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Alimentação
+  const totalCalories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+  const totalProtein = meals.reduce((sum, m) => sum + (m.protein || 0), 0);
+  const totalCarbs = meals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+  const totalFat = meals.reduce((sum, m) => sum + (m.fat || 0), 0);
+
+  previewHTML += `
+    <div class="share-section">
+      <h4>🍽️ Alimentação</h4>
+      <div class="share-data">
+        <div class="share-item">
+          <span class="share-icon">🔥</span>
+          <span class="share-text">Calorias: ${totalCalories}kcal</span>
+        </div>
+        <div class="share-item">
+          <span class="share-icon">🥩</span>
+          <span class="share-text">Proteína: ${totalProtein}g</span>
+        </div>
+        <div class="share-item">
+          <span class="share-icon">🍚</span>
+          <span class="share-text">Carbs: ${totalCarbs}g</span>
+        </div>
+        <div class="share-item">
+          <span class="share-icon">🧈</span>
+          <span class="share-text">Gordura: ${totalFat}g</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  previewHTML += `</div>`;
+
+  document.getElementById("sharePreview").innerHTML = previewHTML;
+  document.getElementById("shareImage").value = "";
+  document.getElementById("imagePreviewContainer").innerHTML = "";
+  shareImageData = null;
+
+  document.getElementById("shareModal").classList.add("active");
+}
+
+function closeShareModal() {
+  document.getElementById("shareModal").classList.remove("active");
+  shareImageData = null;
+}
+
+function handleShareImageUpload(e) {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("A imagem deve ter no máximo 5MB");
+    e.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = (event) => {
+    shareImageData = event.target.result;
+
+    // Mostrar preview
+    const container = document.getElementById("imagePreviewContainer");
+    container.innerHTML = `
+      <div class="share-image-preview">
+        <img src="${shareImageData}" alt="Imagem do dia">
+        <button type="button" class="btn-remove-photo" onclick="removeShareImage()">❌ Remover</button>
+      </div>
+    `;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function removeShareImage() {
+  document.getElementById("shareImage").value = "";
+  document.getElementById("imagePreviewContainer").innerHTML = "";
+  shareImageData = null;
+}
+
+async function downloadShareData() {
+  if (!currentDayShareData) return;
+
+  const { dateObj } = currentDayShareData;
+  const dateStr = dateObj.toLocaleDateString("pt-BR");
+
+  try {
+    // Usar html2canvas para capturar a tela
+    const script = document.createElement("script");
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+
+    script.onload = () => {
+      const shareContent = document.getElementById("sharePreview");
+      html2canvas(shareContent, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+      }).then((canvas) => {
+        downloadCanvas(canvas, dateStr);
+      });
+    };
+
+    document.head.appendChild(script);
+  } catch (error) {
+    alert("Erro ao gerar imagem. Tente copiar o texto.");
+  }
+}
+
+function downloadCanvas(canvas, dateStr) {
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `desafio365_${dateStr.replace(/\//g, "-")}.png`;
+  link.click();
+  showNotification("Imagem baixada com sucesso! 📥");
+}
+
+function copyShareText() {
+  if (!currentDayShareData) return;
+
+  const { dateObj, workoutStatus, water, meals } = currentDayShareData;
+  const dateStr = dateObj.toLocaleDateString("pt-BR");
+
+  const totalWater = water.reduce((sum, w) => sum + w.amount, 0);
+  const totalCalories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+  const totalProtein = meals.reduce((sum, m) => sum + (m.protein || 0), 0);
+  const totalCarbs = meals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+  const totalFat = meals.reduce((sum, m) => sum + (m.fat || 0), 0);
+
+  let text = `📊 Resumo do Dia - ${dateStr}\n`;
+  text += `Desafio 365 Dias\n\n`;
+
+  text += `💪 Treino\n`;
+  if (workoutStatus && workoutStatus.completed) {
+    text += `⏱️ Tempo: ${workoutStatus.duration}min\n`;
+    text += `🔥 Calorias: ${workoutStatus.calories}kcal\n`;
+  } else {
+    text += `Sem treino registrado\n`;
+  }
+
+  text += `\n💧 Água\n`;
+  text += `Total: ${totalWater}ml\n`;
+
+  text += `\n🍽️ Alimentação\n`;
+  text += `🔥 Calorias: ${totalCalories}kcal\n`;
+  text += `🥩 Proteína: ${totalProtein}g\n`;
+  text += `🍚 Carbs: ${totalCarbs}g\n`;
+  text += `🧈 Gordura: ${totalFat}g\n`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showNotification("Texto copiado para a área de transferência! 📋");
+  });
+}
+
 // Inicializar perfil
 function initProfile() {
   renderAssessmentHistory();
   updateComparisonSelects();
   loadPersonalData();
+
+  // Event listeners para modal de dados do dia
+  document
+    .getElementById("dayDataClose")
+    .addEventListener("click", closeDayDataModal);
+  document
+    .getElementById("closeDayDataBtn")
+    .addEventListener("click", closeDayDataModal);
+  document
+    .getElementById("shareDayDataBtn")
+    .addEventListener("click", openShareModal);
+
+  // Event listeners para modal de compartilhamento
+  document
+    .getElementById("shareModalClose")
+    .addEventListener("click", closeShareModal);
+  document
+    .getElementById("cancelShareBtn")
+    .addEventListener("click", closeShareModal);
+  document
+    .getElementById("downloadShareBtn")
+    .addEventListener("click", downloadShareData);
+  document
+    .getElementById("copyShareBtn")
+    .addEventListener("click", copyShareText);
+
+  // Listener para upload de imagem
+  document
+    .getElementById("shareImage")
+    .addEventListener("change", handleShareImageUpload);
 
   // Event listeners
   document
