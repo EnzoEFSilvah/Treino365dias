@@ -189,6 +189,59 @@ const defaultWorkoutPlans = {
   },
 };
 
+// Refeições padrão
+const defaultMeals = [
+  {
+    name: "Café da Manhã",
+    description: "3 Ovos, 2 fatias pão integral, 1 banana, 30g aveia",
+    calories: 530,
+    protein: 28,
+    carbs: 63,
+    fat: 18,
+  },
+  {
+    name: "Lanche da Manhã",
+    description: "1 Maçã, 1 Iogurte Natural 170g, 1 colher pasta de amendoim",
+    calories: 260,
+    protein: 10,
+    carbs: 30,
+    fat: 11,
+  },
+  {
+    name: "Almoço",
+    description:
+      "250g Arroz, 1 concha feijão, 120g Frango grelhado, Salada + 1 col. azeite",
+    calories: 740,
+    protein: 48,
+    carbs: 90,
+    fat: 17,
+  },
+  {
+    name: "Pré-Treino",
+    description: "200g Batata Doce, 1 dose Whey Protein",
+    calories: 295,
+    protein: 27,
+    carbs: 43,
+    fat: 2,
+  },
+  {
+    name: "Pós-Treino / Jantar",
+    description: "200g Arroz Branco, 120g Patinho moído/Carne magra",
+    calories: 500,
+    protein: 41,
+    carbs: 56,
+    fat: 9,
+  },
+  {
+    name: "Ceia",
+    description: "2 Ovos cozidos, 1 colher azeite",
+    calories: 250,
+    protein: 12,
+    carbs: 1,
+    fat: 22,
+  },
+];
+
 // Estado da aplicação
 let workouts = Storage.get("workouts");
 let waterRecords = Storage.get("waterRecords");
@@ -823,8 +876,85 @@ function initMeals() {
     showNotification("Refeição registrada! 🍽️");
   });
 
+  renderDefaultMeals();
   renderMeals();
   updateNutritionGoals();
+}
+
+function renderDefaultMeals() {
+  const container = document.getElementById("defaultMealsContainer");
+
+  container.innerHTML = defaultMeals
+    .map((meal) => {
+      return `
+        <div class="default-meal-card">
+          <div class="meal-header">
+            <h3>${meal.name}</h3>
+          </div>
+          <div class="meal-info">
+            <p class="meal-description">${meal.description}</p>
+            <div class="meal-macros">
+              <div class="macro-item">
+                <span class="macro-icon">🔥</span>
+                <div class="macro-content">
+                  <span class="macro-label">Calorias</span>
+                  <span class="macro-value">${meal.calories} kcal</span>
+                </div>
+              </div>
+              <div class="macro-item">
+                <span class="macro-icon">🥩</span>
+                <div class="macro-content">
+                  <span class="macro-label">Proteína</span>
+                  <span class="macro-value">${meal.protein}g</span>
+                </div>
+              </div>
+              <div class="macro-item">
+                <span class="macro-icon">🍚</span>
+                <div class="macro-content">
+                  <span class="macro-label">Carbs</span>
+                  <span class="macro-value">${meal.carbs}g</span>
+                </div>
+              </div>
+              <div class="macro-item">
+                <span class="macro-icon">🧈</span>
+                <div class="macro-content">
+                  <span class="macro-label">Gordura</span>
+                  <span class="macro-value">${meal.fat}g</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-small btn-success" onclick="addDefaultMeal('${
+            meal.name
+          }', '${meal.description.replace(/'/g, "\\'")}', ${meal.calories}, ${
+        meal.protein
+      }, ${meal.carbs}, ${meal.fat})">
+            ➕ Adicionar
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function addDefaultMeal(type, description, calories, protein, carbs, fat) {
+  const meal = {
+    id: Date.now(),
+    type: type,
+    description: description,
+    calories: calories,
+    protein: protein,
+    carbs: carbs,
+    fat: fat,
+    date: new Date().toISOString(),
+  };
+
+  meals.unshift(meal);
+  Storage.set("meals", meals);
+  renderMeals();
+  updateStats();
+  updateNutritionGoals();
+  showNotification(`${type} adicionada! 🍽️`);
 }
 
 function renderMeals() {
