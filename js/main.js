@@ -1581,11 +1581,18 @@ function clearProfileForms() {
   photoFrontData = "";
   photoBackData = "";
   photoSideData = "";
-  
+
   // Resetar estado de edição
   currentAssessmentId = null;
   const saveBtn = document.getElementById("saveProfileBtn");
   if (saveBtn) saveBtn.textContent = "💾 Salvar Avaliação";
+}
+
+// Função auxiliar para formatar data corretamente (evita problema de timezone)
+function formatDateBR(dateString) {
+  if (!dateString) return "";
+  const [year, month, day] = dateString.split("-");
+  return `${day}/${month}/${year}`;
 }
 
 // Renderizar histórico de avaliações
@@ -1606,7 +1613,7 @@ function renderAssessmentHistory() {
   let html = '<div class="assessment-cards">';
 
   sortedAssessments.forEach((assessment) => {
-    const dateFormatted = new Date(assessment.date).toLocaleDateString("pt-BR");
+    const dateFormatted = formatDateBR(assessment.date);
 
     html += `
       <div class="assessment-card">
@@ -1808,7 +1815,7 @@ function updateComparisonSelects() {
 
   let options = '<option value="">Selecione...</option>';
   sortedAssessments.forEach((assessment) => {
-    const dateFormatted = new Date(assessment.date).toLocaleDateString("pt-BR");
+    const dateFormatted = formatDateBR(assessment.date);
     options += `<option value="${assessment.id}">${dateFormatted}</option>`;
   });
 
@@ -1847,8 +1854,8 @@ function compareAssessments() {
 
   const container = document.getElementById("comparisonResults");
 
-  const date1 = new Date(older.date).toLocaleDateString("pt-BR");
-  const date2 = new Date(newer.date).toLocaleDateString("pt-BR");
+  const date1 = formatDateBR(older.date);
+  const date2 = formatDateBR(newer.date);
 
   // Calcular diferenças
   const weightDiff = (newer.personal.weight - older.personal.weight).toFixed(1);
