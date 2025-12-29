@@ -1632,6 +1632,12 @@ footer {
   border-bottom: 2px solid rgba(102, 126, 234, 0.3);
 }
 
+.assessment-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .assessment-date {
   font-size: 1.1rem;
   font-weight: bold;

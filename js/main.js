@@ -6,32 +6,32 @@ const Storage = {
   },
   set(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
-  },
-};
-
-// Treinos padrão por dia da semana
-const defaultWorkoutPlans = {
-  1: {
-    // Segunda-feira
-    name: "Peito, Ombro e Tríceps",
-    exercises: [
-      {
-        name: "Supino Inclinado com Halteres",
-        details: "4 séries de 10-12 reps",
-        completed: false,
-      },
-      {
-        name: "Supino Reto (Barra ou Halter)",
-        details: "3 séries de 8-10 reps",
-        completed: false,
-      },
-      {
-        name: "Desenvolvimento Militar (Sentado ou em pé)",
-        details: "4 séries de 8-12 reps",
-        completed: false,
-      },
-      {
-        name: "Elevação Lateral",
+          <span class="assessment-date">📅 ${dateFormatted}</span>
+          <div class="assessment-actions">
+            <button class="btn btn-secondary btn-small" onclick="editAssessment(${assessment.id})">✏️ Editar</button>
+            <button class="btn-delete-assessment" onclick="deleteAssessment(${assessment.id})">🗑️</button>
+          </div>
+        </div>
+        <div class="assessment-data">
+          <div class="data-section">
+            <h4>📋 Dados Pessoais</h4>
+            <p><strong>Peso:</strong> ${assessment.personal.weight} kg</p>
+            <p><strong>Altura:</strong> ${assessment.personal.height} cm</p>
+          </div>
+          <div class="data-section">
+            <h4>⚡ Bioimpedância</h4>
+            <p><strong>% Gordura:</strong> ${assessment.bioimpedance.bodyFatPercent}%</p>
+            <p><strong>% Massa Muscular:</strong> ${assessment.bioimpedance.muscleMassPercent}%</p>
+            <p><strong>IMC:</strong> ${assessment.bioimpedance.bmi}</p>
+          </div>
+          <div class="data-section">
+            <h4>📏 Perímetros Principais</h4>
+            <p><strong>Cintura:</strong> ${assessment.perimeters.waist} cm</p>
+            <p><strong>Peitoral:</strong> ${assessment.perimeters.chest} cm</p>
+            <p><strong>Quadril:</strong> ${assessment.perimeters.hip} cm</p>
+            <p><strong>Pescoço:</strong> ${assessment.perimeters.neck || 0} cm</p>
+          </div>
+        </div>
         details: "4 séries de 12-15 reps",
         completed: false,
       },
@@ -1399,6 +1399,20 @@ let assessments = Storage.get("assessments") || [];
 let photoFrontData = "";
 let photoBackData = "";
 let photoSideData = "";
+let currentAssessmentId = null;
+
+function setPhotoPreview(previewId, imgData, inputId) {
+  const preview = document.getElementById(previewId);
+  if (!imgData) {
+    preview.innerHTML = "";
+    return;
+  }
+
+  preview.innerHTML = `
+    <img src="${imgData}" alt="Preview" class="photo-preview-img">
+    <button type="button" class="btn-remove-photo" onclick="removePhoto('${inputId}', '${previewId}')">❌ Remover</button>
+  `;
+}
 
 // Função para processar upload de foto
 function handlePhotoUpload(inputId, previewId, photoDataVar) {
@@ -1462,6 +1476,7 @@ function calculateBMI() {
 
 // Salvar avaliação completa
 function saveProfileAssessment() {
+  const isEditing = Boolean(currentAssessmentId);
   const assessmentDate = document.getElementById("assessmentDate").value;
 
   if (!assessmentDate) {
@@ -1469,10 +1484,13 @@ function saveProfileAssessment() {
     return;
   }
 
+  const assessmentId = isEditing ? currentAssessmentId : Date.now();
+  const timestamp = new Date(assessmentDate).getTime();
+
   const assessment = {
-    id: Date.now(),
+    id: assessmentId,
     date: assessmentDate,
-    timestamp: new Date(assessmentDate).getTime(),
+    timestamp,
     personal: {
       name: document.getElementById("userName").value || "",
       age: parseInt(document.getElementById("userAge").value) || 0,
@@ -1526,13 +1544,26 @@ function saveProfileAssessment() {
     },
   };
 
-  assessments.push(assessment);
-  Storage.set("assessments", assessments);
+  if (isEditing) {
+    const idx = assessments.findIndex((a) => a.id === currentAssessmentId);
+    if (idx >= 0) {
+      assessments[idx] = assessment;
+    } else {
+      assessments.push(assessment);
+    }
+    showNotification("Avaliação atualizada! ✅");
+  } else {
+    assessments.push(assessment);
+    showNotification("Avaliação salva com sucesso! 💪");
+  }
 
-  showNotification("Avaliação salva com sucesso! 💪");
+  Storage.set("assessments", assessments);
   renderAssessmentHistory();
   updateComparisonSelects();
   clearProfileForms();
+  currentAssessmentId = null;
+  const saveBtn = document.getElementById("saveProfileBtn");
+  if (saveBtn) saveBtn.textContent = "💾 Salvar Avaliação";
 }
 
 // Limpar formulários após salvar
@@ -1571,6 +1602,10 @@ function clearProfileForms() {
   photoFrontData = "";
   photoBackData = "";
   photoSideData = "";
+
+  const saveBtn = document.getElementById("saveProfileBtn");
+  if (saveBtn) saveBtn.textContent = "💾 Salvar Avaliação";
+  currentAssessmentId = null;
 }
 
 // Renderizar histórico de avaliações
@@ -1603,8 +1638,15 @@ function renderAssessmentHistory() {
         </div>
         <div class="assessment-data">
           <div class="data-section">
-            <h4>📋 Dados Pessoais</h4>
-            <p><strong>Peso:</strong> ${assessment.personal.weight} kg</p>
+            <span class="assessment-date">📅 ${dateFormatted}</span>
+            <div class="assessment-actions">
+              <button class="btn btn-secondary btn-small" onclick="editAssessment(${
+                assessment.id
+              })">✏️ Editar</button>
+              <button class="btn-delete-assessment" onclick="deleteAssessment(${
+                assessment.id
+              })">🗑️</button>
+            </div>
             <p><strong>Altura:</strong> ${assessment.personal.height} cm</p>
           </div>
           <div class="data-section">
@@ -1672,6 +1714,84 @@ function deleteAssessment(id) {
     renderAssessmentHistory();
     updateComparisonSelects();
     showNotification("Avaliação excluída!");
+  }
+}
+
+function editAssessment(id) {
+  const assessment = assessments.find((a) => a.id === id);
+  if (!assessment) {
+    alert("Avaliação não encontrada.");
+    return;
+  }
+
+  currentAssessmentId = id;
+
+  const tabBtn = document.querySelector('.tab-btn[data-tab="perfil"]');
+  if (tabBtn) tabBtn.click();
+
+  document.getElementById("assessmentDate").value = assessment.date || "";
+
+  document.getElementById("userName").value = assessment.personal.name || "";
+  document.getElementById("userAge").value = assessment.personal.age || "";
+  document.getElementById("userHeight").value =
+    assessment.personal.height || "";
+  document.getElementById("userWeight").value =
+    assessment.personal.weight || "";
+
+  document.getElementById("bodyFatPercent").value =
+    assessment.bioimpedance.bodyFatPercent || "";
+  document.getElementById("muscleMassPercent").value =
+    assessment.bioimpedance.muscleMassPercent || "";
+  document.getElementById("visceralFat").value =
+    assessment.bioimpedance.visceralFat || "";
+  document.getElementById("bmr").value = assessment.bioimpedance.bmr || "";
+  document.getElementById("bmi").value = assessment.bioimpedance.bmi || "";
+  document.getElementById("biologicalAge").value =
+    assessment.bioimpedance.biologicalAge || "";
+
+  document.getElementById("shoulderPerimeter").value =
+    assessment.perimeters.shoulder || "";
+  document.getElementById("chestPerimeter").value =
+    assessment.perimeters.chest || "";
+  document.getElementById("waistPerimeter").value =
+    assessment.perimeters.waist || "";
+  document.getElementById("abdomenPerimeter").value =
+    assessment.perimeters.abdomen || "";
+  document.getElementById("hipPerimeter").value =
+    assessment.perimeters.hip || "";
+  document.getElementById("neckPerimeter").value =
+    assessment.perimeters.neck || "";
+  document.getElementById("thighRightPerimeter").value =
+    assessment.perimeters.thighRight || "";
+  document.getElementById("thighLeftPerimeter").value =
+    assessment.perimeters.thighLeft || "";
+  document.getElementById("armRelaxedRightPerimeter").value =
+    assessment.perimeters.armRelaxedRight || "";
+  document.getElementById("armRelaxedLeftPerimeter").value =
+    assessment.perimeters.armRelaxedLeft || "";
+  document.getElementById("forearmRightPerimeter").value =
+    assessment.perimeters.forearmRight || "";
+  document.getElementById("forearmLeftPerimeter").value =
+    assessment.perimeters.forearmLeft || "";
+  document.getElementById("calfRightPerimeter").value =
+    assessment.perimeters.calfRight || "";
+  document.getElementById("calfLeftPerimeter").value =
+    assessment.perimeters.calfLeft || "";
+
+  photoFrontData = (assessment.photos && assessment.photos.front) || "";
+  photoBackData = (assessment.photos && assessment.photos.back) || "";
+  photoSideData = (assessment.photos && assessment.photos.side) || "";
+
+  setPhotoPreview("photoFrontPreview", photoFrontData, "photoFront");
+  setPhotoPreview("photoBackPreview", photoBackData, "photoBack");
+  setPhotoPreview("photoSidePreview", photoSideData, "photoSide");
+
+  const saveBtn = document.getElementById("saveProfileBtn");
+  if (saveBtn) saveBtn.textContent = "Atualizar Avaliação";
+
+  const perfilSection = document.getElementById("perfil");
+  if (perfilSection) {
+    perfilSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
