@@ -17,12 +17,17 @@ const defaultWorkoutPlans = {
     exercises: [
       {
         name: "Supino Inclinado com Halteres",
-        details: "4 séries de 10-12 reps",
+        details: "4 séries de 8-12 reps",
         completed: false,
       },
       {
         name: "Supino Reto (Barra ou Halter)",
         details: "3 séries de 8-10 reps",
+        completed: false,
+      },
+      {
+        name: "Voador (Peck Deck)",
+        details: "3 séries de 15 reps",
         completed: false,
       },
       {
@@ -37,7 +42,7 @@ const defaultWorkoutPlans = {
       },
       {
         name: "Tríceps Corda",
-        details: "3 séries de 12 reps",
+        details: "4 séries de 12 reps",
         completed: false,
       },
     ],
@@ -48,7 +53,7 @@ const defaultWorkoutPlans = {
     exercises: [
       {
         name: "Puxada Alta (Polia)",
-        details: "4 séries de 8-12 reps",
+        details: "4 séries de 10-12 reps",
         completed: false,
       },
       {
@@ -57,12 +62,17 @@ const defaultWorkoutPlans = {
         completed: false,
       },
       {
-        name: "Crucifixo Inverso (Máquina ou Halteres)",
+        name: "Remada Baixa Triângulo",
         details: "3 séries de 15 reps",
         completed: false,
       },
       {
         name: "Rosca Direta (Barra ou Halteres)",
+        details: "3 séries de 10-12 reps",
+        completed: false,
+      },
+      {
+        name: "Rosca Martelo",
         details: "3 séries de 10-12 reps",
         completed: false,
       },
@@ -104,6 +114,11 @@ const defaultWorkoutPlans = {
         completed: false,
       },
       {
+        name: "Mesaa Flexora",
+        details: "4 séries de 12 reps",
+        completed: false,
+      },
+      {
         name: "Panturrilha em Pé",
         details: "4 séries de 15-20 reps",
         completed: false,
@@ -120,18 +135,28 @@ const defaultWorkoutPlans = {
         completed: false,
       },
       {
-        name: "Supino Reto (Barra ou Halter)",
-        details: "3 séries de 8-10 reps",
+        name: "Puxada Alta pela Frente (Pegada Aberta)",
+        details: "3 séries de 10-12 reps",
         completed: false,
       },
       {
-        name: "Desenvolvimento Militar (Sentado ou em pé)",
-        details: "4 séries de 8-12 reps",
+        name: "Desenvolvimento com Halteres (Sentado)",
+        details: "4 séries de 10-12 reps",
+        completed: false,
+      },
+      {
+        name: "Remada Serrote (Unilateral com Halter)",
+        details: "4 séries de 12 reps cada lado",
         completed: false,
       },
       {
         name: "Elevação Lateral",
         details: "4 séries de 12-15 reps",
+        completed: false,
+      },
+      {
+        name: "Rosca Direta (Barra W ou Halteres)",
+        details: "3 séries de 12 reps",
         completed: false,
       },
       {
@@ -143,26 +168,36 @@ const defaultWorkoutPlans = {
   },
   5: {
     // Sexta-feira
-    name: "Costas, Bíceps e Abdômen",
+    name: "Treino Lower",
     exercises: [
       {
-        name: "Puxada Alta (Polia)",
-        details: "4 séries de 8-12 reps",
+        name: "Stiff",
+        details: "4 séries de 10 reps",
         completed: false,
       },
       {
-        name: "Remada Curvada (Barra ou Máquina)",
+        name: "Elevação Pélvica",
         details: "4 séries de 10-12 reps",
         completed: false,
       },
       {
-        name: "Crucifixo Inverso (Máquina ou Halteres)",
-        details: "3 séries de 15 reps",
+        name: "Mesa Flexora",
+        details: "4 séries de 15 reps",
         completed: false,
       },
       {
-        name: "Rosca Direta (Barra ou Halteres)",
-        details: "3 séries de 10-12 reps",
+        name: "Afundo com Halteres(Passada)",
+        details: "3 séries de 20 reps(10 passos para cada perna.)",
+        completed: false,
+      },
+      {
+        name: "Cadeira Adutora",
+        details: "4 séries de 20 reps",
+        completed: false,
+      },
+      {
+        name: "Panturrilha no Leg Press",
+        details: "4 séries de 20 reps",
         completed: false,
       },
       {
@@ -258,6 +293,9 @@ let completedWorkoutDates =
 // Estado de edição de registros de histórico
 let currentEdit = null; // { type: 'workout' | 'water' | 'meal', id: number }
 
+// Mês atual do calendário
+let currentCalendarMonth = new Date().getMonth();
+
 // Inicialização
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
@@ -295,32 +333,38 @@ function initDailyWorkout() {
   const dayOfWeek = today.getDay();
   const dateKey = today.toISOString().split("T")[0];
 
-  // Exibir dia atual
-  const dayNames = [
-    "Domingo",
-    "Segunda-feira",
-    "Terça-feira",
-    "Quarta-feira",
-    "Quinta-feira",
-    "Sexta-feira",
-    "Sábado",
-  ];
-  document.getElementById("currentDay").textContent = dayNames[dayOfWeek];
+  // Carregar treino do dia atual
+  const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek; // Domingo = 7
+  loadWorkoutForDayOfWeek(adjustedDayOfWeek);
 
-  // Carregar treino do dia
-  const todayPlan = workoutPlans[dayOfWeek];
-  document.getElementById("workoutDayName").textContent = todayPlan.name;
+  // Mas se for o dia atual, permitir edição carregando o estado salvo
+  if (dailyWorkoutStatus[dateKey] && dailyWorkoutStatus[dateKey].exercises.length > 0) {
+    // Usar os exercícios salvos para edição
+    const exercises = dailyWorkoutStatus[dateKey].exercises;
+    const completedCount = exercises.filter(ex => ex.completed).length;
+    document.getElementById("exercisesCompleted").textContent = completedCount;
+    document.getElementById("totalExercises").textContent = exercises.length;
 
-  // Carregar estado dos exercícios
-  if (!dailyWorkoutStatus[dateKey]) {
-    dailyWorkoutStatus[dateKey] = {
-      exercises: JSON.parse(JSON.stringify(todayPlan.exercises)),
-      completed: false,
-    };
-    saveDailyWorkoutStatus();
+    const exercisesList = document.getElementById("exercisesList");
+    exercisesList.innerHTML = exercises
+      .map(
+        (exercise, index) => `
+      <div class="exercise-item ${exercise.completed ? "completed" : ""}">
+        <input 
+          type="checkbox" 
+          class="exercise-checkbox" 
+          ${exercise.completed ? "checked" : ""}
+          onchange="toggleExercise(${index})"
+        >
+        <div class="exercise-info">
+          <div class="exercise-name">${exercise.name}</div>
+          <div class="exercise-details">${exercise.details}</div>
+        </div>
+      </div>
+    `
+      )
+      .join("");
   }
-
-  renderDailyExercises();
 
   // Botão de editar treino
   document
@@ -400,15 +444,48 @@ function renderDailyExercises() {
     .join("");
 }
 
-function toggleExercise(index) {
-  const today = new Date();
-  const dateKey = today.toISOString().split("T")[0];
+function loadWorkoutForDayOfWeek(dayOfWeek) {
+  // dayOfWeek: 1=segunda, 2=terça, ..., 7=domingo
+  const defaultPlan = defaultWorkoutPlans[dayOfWeek];
+  let exercises = [];
+  if (defaultPlan) {
+    exercises = defaultPlan.exercises.map(ex => ({ ...ex })); // Copia os exercícios
+  }
 
-  dailyWorkoutStatus[dateKey].exercises[index].completed =
-    !dailyWorkoutStatus[dateKey].exercises[index].completed;
+  // Atualiza a interface
+  document.getElementById("workoutDayName").textContent = defaultPlan?.name || "Dia de Descanso";
+  document.getElementById("currentDay").textContent = ["", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"][dayOfWeek];
 
-  saveDailyWorkoutStatus();
-  renderDailyExercises();
+  const exercisesList = document.getElementById("exercisesList");
+  if (exercises.length === 0) {
+    exercisesList.innerHTML = '<div class="empty-state" style="color: #666;">Dia de descanso ou sem treino programado.</div>';
+    document.getElementById("exercisesCompleted").textContent = "0";
+    document.getElementById("totalExercises").textContent = "0";
+    return;
+  }
+
+  const completedCount = exercises.filter(ex => ex.completed).length;
+  document.getElementById("exercisesCompleted").textContent = completedCount;
+  document.getElementById("totalExercises").textContent = exercises.length;
+
+  exercisesList.innerHTML = exercises
+    .map(
+      (exercise, index) => `
+    <div class="exercise-item ${exercise.completed ? "completed" : ""}">
+      <input 
+        type="checkbox" 
+        class="exercise-checkbox" 
+        ${exercise.completed ? "checked" : ""}
+        disabled
+      >
+      <div class="exercise-info">
+        <div class="exercise-name">${exercise.name}</div>
+        <div class="exercise-details">${exercise.details}</div>
+      </div>
+    </div>
+  `
+    )
+    .join("");
 }
 
 function completeWorkout() {
@@ -686,69 +763,103 @@ function renderWorkoutCalendar() {
   let calendarHTML = "";
 
   const monthNames = [
-    "Jan",
-    "Fev",
-    "Mar",
-    "Abr",
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set",
-    "Out",
-    "Nov",
-    "Dez",
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
   ];
 
-  for (let month = 0; month < 12; month++) {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+  const month = currentCalendarMonth;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startingDayOfWeek = firstDay.getDay();
 
-    calendarHTML += `
-      <div class="calendar-month">
-        <div class="calendar-month-name">${monthNames[month]}</div>
-        <div class="calendar-days">
-    `;
-
-    // Dias vazios antes do primeiro dia do mês
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      calendarHTML += '<div class="calendar-day empty"></div>';
-    }
-
-    // Dias do mês
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dateKey = date.toISOString().split("T")[0];
-
-      const isToday = date.toDateString() === today.toDateString();
-      const isCompleted = completedWorkoutDates.includes(dateKey);
-
-      let classes = "calendar-day";
-      if (isToday) classes += " today";
-      if (isCompleted) classes += " completed";
-
-      let titleText = date.toLocaleDateString("pt-BR");
-
-      // Adicionar informações de tempo e calorias ao título se treino foi concluído
-      if (isCompleted && dailyWorkoutStatus[dateKey]) {
-        const workoutData = dailyWorkoutStatus[dateKey];
-        if (workoutData.duration && workoutData.calories) {
-          titleText += ` | ⏱️ ${workoutData.duration}min | 🔥 ${workoutData.calories}kcal`;
-        }
-      }
-
-      calendarHTML += `<div class="${classes}" title="${titleText}">${day}</div>`;
-    }
-
-    calendarHTML += `
-        </div>
+  calendarHTML += `
+    <div class="calendar-navigation">
+      <button class="btn btn-secondary" id="prevMonthBtn">&larr; Anterior</button>
+      <h3>${monthNames[month]} ${year}</h3>
+      <button class="btn btn-secondary" id="nextMonthBtn">Próximo &rarr;</button>
+    </div>
+    <div class="calendar-month">
+      <div class="calendar-weekdays">
+        <div class="weekday-header">Dom</div>
+        <div class="weekday-header">Seg</div>
+        <div class="weekday-header">Ter</div>
+        <div class="weekday-header">Qua</div>
+        <div class="weekday-header">Qui</div>
+        <div class="weekday-header">Sex</div>
+        <div class="weekday-header">Sáb</div>
       </div>
-    `;
+      <div class="calendar-days">
+  `;
+
+  // Dias vazios antes do primeiro dia do mês
+  for (let i = 0; i < startingDayOfWeek; i++) {
+    calendarHTML += '<div class="calendar-day empty"></div>';
   }
 
+  // Dias do mês
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const dateKey = date.toISOString().split("T")[0];
+
+    const isToday = date.toDateString() === today.toDateString();
+    const isCompleted = completedWorkoutDates.includes(dateKey);
+
+    let classes = "calendar-day";
+    if (isToday) classes += " today";
+    if (isCompleted) classes += " completed";
+
+    let titleText = date.toLocaleDateString("pt-BR");
+
+    // Adicionar informações de tempo e calorias ao título se treino foi concluído
+    if (isCompleted && dailyWorkoutStatus[dateKey]) {
+      const workoutData = dailyWorkoutStatus[dateKey];
+      if (workoutData.duration && workoutData.calories) {
+        titleText += ` | ⏱️ ${workoutData.duration}min | 🔥 ${workoutData.calories}kcal`;
+      }
+    }
+
+    calendarHTML += `<div class="${classes}" title="${titleText}">${day}</div>`;
+  }
+
+  calendarHTML += `
+      </div>
+    </div>
+  `;
+
   calendar.innerHTML = calendarHTML;
+
+  // Adicionar event listeners para navegação
+  document.getElementById("prevMonthBtn").addEventListener("click", () => {
+    currentCalendarMonth = currentCalendarMonth > 0 ? currentCalendarMonth - 1 : 11;
+    renderWorkoutCalendar();
+  });
+
+  document.getElementById("nextMonthBtn").addEventListener("click", () => {
+    currentCalendarMonth = currentCalendarMonth < 11 ? currentCalendarMonth + 1 : 0;
+    renderWorkoutCalendar();
+  });
+
+  // Adicionar event listener para os cards dos dias da semana
+  const weekdayCardsContainer = document.getElementById("weekdayCardsContainer");
+  if (weekdayCardsContainer) {
+    weekdayCardsContainer.addEventListener("click", (e) => {
+      if (e.target.classList.contains("weekday-card")) {
+        const dayOfWeek = parseInt(e.target.dataset.day);
+        loadWorkoutForDayOfWeek(dayOfWeek);
+      }
+    });
+  }
 
   // Atualizar estatísticas
   const yearCount = completedWorkoutDates.filter((date) =>

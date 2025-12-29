@@ -788,9 +788,6 @@ main {
 }
 
 .workout-calendar {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 0.5rem;
   max-height: 600px;
   overflow-x: auto;
   overflow-y: auto;
@@ -816,18 +813,63 @@ main {
   background: #5568d3;
 }
 
+.calendar-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-navigation h3 {
+  margin: 0;
+  color: #667eea;
+  font-size: 1.2rem;
+}
+
+.weekday-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.weekday-card {
+  background: #667eea;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.weekday-card:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .calendar-month {
   background: #f9f9f9;
   border-radius: 8px;
   padding: 0.8rem;
 }
 
-.calendar-month-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #667eea;
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
   margin-bottom: 0.5rem;
+}
+
+.weekday-header {
   text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #666;
+  padding: 0.3rem 0;
 }
 
 .calendar-days {
@@ -1087,8 +1129,28 @@ footer {
     padding: 0.9rem;
   }
 
+  .weekday-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+  }
+
+  .weekday-card {
+    padding: 0.4rem;
+    font-size: 0.7rem;
+  }
+
   .workout-calendar {
-    grid-template-columns: repeat(6, 1fr);
+    /* Removido grid para mostrar apenas um mês */
+  }
+
+  .weekday-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+  }
+
+  .weekday-card {
+    padding: 0.4rem;
+    font-size: 0.7rem;
   }
 
   .calendar-stats {
@@ -1470,8 +1532,7 @@ footer {
   }
 
   .workout-calendar {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.3rem;
+    /* Removido grid para mostrar apenas um mês */
     max-height: 400px;
   }
 
@@ -1543,6 +1604,16 @@ footer {
     margin-top: 2rem;
     font-size: 0.9rem;
   }
+
+  .weekday-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.3rem;
+  }
+
+  .weekday-card {
+    padding: 0.3rem;
+    font-size: 0.6rem;
+  }
 }
 
 /* Responsive - Celulares Pequenos (360px e abaixo) */
@@ -1581,7 +1652,7 @@ footer {
   }
 
   .workout-calendar {
-    grid-template-columns: repeat(3, 1fr);
+    /* Removido grid para mostrar apenas um mês */
   }
 }
 
