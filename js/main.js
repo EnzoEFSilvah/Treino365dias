@@ -332,7 +332,7 @@ function initDailyWorkout() {
     .getElementById("completeWorkoutBtn")
     .addEventListener("click", completeWorkout);
 
-  // Modal
+  // Modal de edição
   document
     .querySelector(".modal-close")
     .addEventListener("click", closeEditModal);
@@ -345,6 +345,17 @@ function initDailyWorkout() {
   document
     .getElementById("addExerciseBtn")
     .addEventListener("click", addNewExercise);
+
+  // Modal de conclusão do treino
+  document
+    .getElementById("completeWorkoutClose")
+    .addEventListener("click", closeCompleteWorkoutModal);
+  document
+    .getElementById("cancelCompleteWorkoutBtn")
+    .addEventListener("click", closeCompleteWorkoutModal);
+  document
+    .getElementById("confirmCompleteWorkoutBtn")
+    .addEventListener("click", saveCompleteWorkout);
 }
 
 function renderDailyExercises() {
@@ -419,8 +430,38 @@ function completeWorkout() {
     if (!confirmComplete) return;
   }
 
-  // Marcar como concluído
+  // Abrir modal para registrar tempo e calorias
+  openCompleteWorkoutModal();
+}
+
+function openCompleteWorkoutModal() {
+  document.getElementById("completeWorkoutModal").classList.add("active");
+  document.getElementById("workoutTime").focus();
+}
+
+function closeCompleteWorkoutModal() {
+  document.getElementById("completeWorkoutModal").classList.remove("active");
+  document.getElementById("completeWorkoutForm").reset();
+}
+
+function saveCompleteWorkout() {
+  const workoutTime = parseInt(document.getElementById("workoutTime").value);
+  const workoutCalories = parseInt(
+    document.getElementById("workoutCalories").value
+  );
+
+  if (!workoutTime || !workoutCalories) {
+    alert("Por favor, preencha todos os campos!");
+    return;
+  }
+
+  const today = new Date();
+  const dateKey = today.toISOString().split("T")[0];
+
+  // Marcar como concluído com tempo e calorias
   dailyWorkoutStatus[dateKey].completed = true;
+  dailyWorkoutStatus[dateKey].duration = workoutTime;
+  dailyWorkoutStatus[dateKey].calories = workoutCalories;
 
   // Adicionar à lista de datas concluídas
   if (!completedWorkoutDates.includes(dateKey)) {
@@ -435,7 +476,11 @@ function completeWorkout() {
   renderWorkoutCalendar();
   updateStats();
 
-  showNotification("🎉 Treino concluído! Parabéns! 💪");
+  closeCompleteWorkoutModal();
+
+  showNotification(
+    `🎉 Treino concluído! ⏱️ ${workoutTime}min | 🔥 ${workoutCalories}kcal`
+  );
 
   // Resetar para o próximo dia
   setTimeout(() => {
@@ -634,9 +679,17 @@ function renderWorkoutCalendar() {
       if (isToday) classes += " today";
       if (isCompleted) classes += " completed";
 
-      calendarHTML += `<div class="${classes}" title="${date.toLocaleDateString(
-        "pt-BR"
-      )}">${day}</div>`;
+      let titleText = date.toLocaleDateString("pt-BR");
+      
+      // Adicionar informações de tempo e calorias ao título se treino foi concluído
+      if (isCompleted && dailyWorkoutStatus[dateKey]) {
+        const workoutData = dailyWorkoutStatus[dateKey];
+        if (workoutData.duration && workoutData.calories) {
+          titleText += ` | ⏱️ ${workoutData.duration}min | 🔥 ${workoutData.calories}kcal`;
+        }
+      }
+
+      calendarHTML += `<div class="${classes}" title="${titleText}">${day}</div>`;
     }
 
     calendarHTML += `

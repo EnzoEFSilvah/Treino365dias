@@ -98,6 +98,54 @@
               </div>
             </div>
           </div>
+
+          <!-- Modal de Conclusão do Treino -->
+          <div id="completeWorkoutModal" class="modal">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>📊 Registrar Conclusão do Treino</h3>
+                <button class="modal-close" id="completeWorkoutClose">
+                  &times;
+                </button>
+              </div>
+              <div class="modal-body">
+                <form id="completeWorkoutForm" class="edit-record-form">
+                  <div class="form-group">
+                    <label for="workoutTime"
+                      >⏱️ Tempo de Treino (minutos)</label
+                    >
+                    <input
+                      type="number"
+                      id="workoutTime"
+                      min="1"
+                      placeholder="Ex: 60"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="workoutCalories"
+                      >🔥 Calorias Gastas (kcal)</label
+                    >
+                    <input
+                      type="number"
+                      id="workoutCalories"
+                      min="0"
+                      placeholder="Ex: 500"
+                      required
+                    />
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelCompleteWorkoutBtn">
+                  Cancelar
+                </button>
+                <button class="btn btn-primary" id="confirmCompleteWorkoutBtn">
+                  ✅ Concluir Treino
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Calendário de Treinos -->
