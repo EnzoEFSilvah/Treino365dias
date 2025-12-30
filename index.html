@@ -420,6 +420,10 @@
         <h2>Registrar Refeição</h2>
         <form id="mealForm" class="form-card">
           <div class="form-group">
+            <label for="mealDate">Data da Refeição</label>
+            <input type="date" id="mealDate" required />
+          </div>
+          <div class="form-group">
             <label for="mealType">Tipo de Refeição</label>
             <select id="mealType" required>
               <option value="">Selecione...</option>
@@ -474,6 +478,12 @@
         </form>
 
         <h3>Histórico de Refeições</h3>
+        <div class="form-card">
+          <div class="form-group">
+            <label for="mealHistoryDate">Mostrar refeições do dia</label>
+            <input type="date" id="mealHistoryDate" />
+          </div>
+        </div>
         <div id="mealList" class="records-list"></div>
       </section>
 

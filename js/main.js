@@ -127,7 +127,7 @@ const defaultWorkoutPlans = {
   },
   4: {
     // Quinta-feira
-    name: "Peito, Ombro e Tríceps",
+    name: "Treino Upper",
     exercises: [
       {
         name: "Supino Inclinado com Halteres",
@@ -338,10 +338,13 @@ function initDailyWorkout() {
   loadWorkoutForDayOfWeek(adjustedDayOfWeek);
 
   // Mas se for o dia atual, permitir edição carregando o estado salvo
-  if (dailyWorkoutStatus[dateKey] && dailyWorkoutStatus[dateKey].exercises.length > 0) {
+  if (
+    dailyWorkoutStatus[dateKey] &&
+    dailyWorkoutStatus[dateKey].exercises.length > 0
+  ) {
     // Usar os exercícios salvos para edição
     const exercises = dailyWorkoutStatus[dateKey].exercises;
-    const completedCount = exercises.filter(ex => ex.completed).length;
+    const completedCount = exercises.filter((ex) => ex.completed).length;
     document.getElementById("exercisesCompleted").textContent = completedCount;
     document.getElementById("totalExercises").textContent = exercises.length;
 
@@ -449,22 +452,33 @@ function loadWorkoutForDayOfWeek(dayOfWeek) {
   const defaultPlan = defaultWorkoutPlans[dayOfWeek];
   let exercises = [];
   if (defaultPlan) {
-    exercises = defaultPlan.exercises.map(ex => ({ ...ex })); // Copia os exercícios
+    exercises = defaultPlan.exercises.map((ex) => ({ ...ex })); // Copia os exercícios
   }
 
   // Atualiza a interface
-  document.getElementById("workoutDayName").textContent = defaultPlan?.name || "Dia de Descanso";
-  document.getElementById("currentDay").textContent = ["", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"][dayOfWeek];
+  document.getElementById("workoutDayName").textContent =
+    defaultPlan?.name || "Dia de Descanso";
+  document.getElementById("currentDay").textContent = [
+    "",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+    "Domingo",
+  ][dayOfWeek];
 
   const exercisesList = document.getElementById("exercisesList");
   if (exercises.length === 0) {
-    exercisesList.innerHTML = '<div class="empty-state" style="color: #666;">Dia de descanso ou sem treino programado.</div>';
+    exercisesList.innerHTML =
+      '<div class="empty-state" style="color: #666;">Dia de descanso ou sem treino programado.</div>';
     document.getElementById("exercisesCompleted").textContent = "0";
     document.getElementById("totalExercises").textContent = "0";
     return;
   }
 
-  const completedCount = exercises.filter(ex => ex.completed).length;
+  const completedCount = exercises.filter((ex) => ex.completed).length;
   document.getElementById("exercisesCompleted").textContent = completedCount;
   document.getElementById("totalExercises").textContent = exercises.length;
 
@@ -617,7 +631,9 @@ function renderEditExercises() {
          ondragleave="handleExerciseDragLeave(event, ${index})"
          ondrop="handleExerciseDrop(event, ${index})">
       <div class="edit-exercise-header">
-        <div class="edit-exercise-number"><span class="drag-handle" title="Arraste para reordenar">↕️</span> Exercício ${index + 1}</div>
+        <div class="edit-exercise-number"><span class="drag-handle" title="Arraste para reordenar">↕️</span> Exercício ${
+          index + 1
+        }</div>
         <button class="btn-remove-exercise" onclick="removeExercise(${index})">🗑️ Remover</button>
       </div>
       <div class="edit-exercise-inputs">
@@ -670,14 +686,31 @@ function handleExerciseDrop(e, targetIndex) {
   const el = e.currentTarget;
   if (el) el.classList.remove("drag-over");
 
-  const sourceStr = e.dataTransfer ? e.dataTransfer.getData("text/plain") : null;
-  const sourceIndex = sourceStr !== null && sourceStr !== "" ? parseInt(sourceStr, 10) : exerciseDragIndex;
-  if (Number.isNaN(sourceIndex) || sourceIndex === null || sourceIndex === targetIndex) return;
+  const sourceStr = e.dataTransfer
+    ? e.dataTransfer.getData("text/plain")
+    : null;
+  const sourceIndex =
+    sourceStr !== null && sourceStr !== ""
+      ? parseInt(sourceStr, 10)
+      : exerciseDragIndex;
+  if (
+    Number.isNaN(sourceIndex) ||
+    sourceIndex === null ||
+    sourceIndex === targetIndex
+  )
+    return;
 
   const today = new Date();
   const dayOfWeek = today.getDay();
   const list = workoutPlans[dayOfWeek].exercises;
-  if (!Array.isArray(list) || sourceIndex < 0 || sourceIndex >= list.length || targetIndex < 0 || targetIndex >= list.length) return;
+  if (
+    !Array.isArray(list) ||
+    sourceIndex < 0 ||
+    sourceIndex >= list.length ||
+    targetIndex < 0 ||
+    targetIndex >= list.length
+  )
+    return;
 
   const [moved] = list.splice(sourceIndex, 1);
   list.splice(targetIndex, 0, moved);
@@ -829,7 +862,7 @@ function renderWorkoutCalendar() {
       }
     }
 
-    calendarHTML += `<div class="${classes}" title="${titleText}">${day}</div>`;
+    calendarHTML += `<div class="${classes}" data-date="${dateKey}" title="${titleText}">${day}</div>`;
   }
 
   calendarHTML += `
@@ -841,17 +874,21 @@ function renderWorkoutCalendar() {
 
   // Adicionar event listeners para navegação
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
-    currentCalendarMonth = currentCalendarMonth > 0 ? currentCalendarMonth - 1 : 11;
+    currentCalendarMonth =
+      currentCalendarMonth > 0 ? currentCalendarMonth - 1 : 11;
     renderWorkoutCalendar();
   });
 
   document.getElementById("nextMonthBtn").addEventListener("click", () => {
-    currentCalendarMonth = currentCalendarMonth < 11 ? currentCalendarMonth + 1 : 0;
+    currentCalendarMonth =
+      currentCalendarMonth < 11 ? currentCalendarMonth + 1 : 0;
     renderWorkoutCalendar();
   });
 
   // Adicionar event listener para os cards dos dias da semana
-  const weekdayCardsContainer = document.getElementById("weekdayCardsContainer");
+  const weekdayCardsContainer = document.getElementById(
+    "weekdayCardsContainer"
+  );
   if (weekdayCardsContainer) {
     weekdayCardsContainer.addEventListener("click", (e) => {
       if (e.target.classList.contains("weekday-card")) {
@@ -878,30 +915,10 @@ function renderWorkoutCalendar() {
   const calendarDays = document.querySelectorAll(".calendar-day.completed");
   calendarDays.forEach((day) => {
     day.addEventListener("click", (e) => {
-      const dayText = e.target.textContent;
-      const month = e.target.closest(".calendar-month");
-      const monthName = month.querySelector(".calendar-month-name").textContent;
-
-      // Encontrar a data a partir do mês e dia
-      const monthIndex = [
-        "Jan",
-        "Fev",
-        "Mar",
-        "Abr",
-        "Mai",
-        "Jun",
-        "Jul",
-        "Ago",
-        "Set",
-        "Out",
-        "Nov",
-        "Dez",
-      ].indexOf(monthName);
-
-      const dateKey = `2025-${String(monthIndex + 1).padStart(2, "0")}-${String(
-        dayText
-      ).padStart(2, "0")}`;
-      openDayDataModal(dateKey);
+      const dateKey = e.currentTarget.dataset.date;
+      if (dateKey) {
+        openDayDataModal(dateKey);
+      }
     });
   });
 }
@@ -1096,9 +1113,25 @@ function deleteWaterRecord(id) {
 
 // SEÇÃO DE ALIMENTAÇÃO
 function initMeals() {
+  const todayKey = new Date().toISOString().split("T")[0];
+  const mealDateInput = document.getElementById("mealDate");
+  const mealHistoryDateInput = document.getElementById("mealHistoryDate");
+
+  if (mealDateInput) mealDateInput.value = todayKey;
+  if (mealHistoryDateInput) {
+    mealHistoryDateInput.value = todayKey;
+    mealHistoryDateInput.addEventListener("change", () => {
+      if (mealDateInput) mealDateInput.value = mealHistoryDateInput.value;
+      renderMeals();
+    });
+  }
+
   const form = document.getElementById("mealForm");
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    const selectedDate = getSelectedMealDate();
+    const mealTimestamp = new Date(`${selectedDate}T12:00:00`).toISOString();
 
     const meal = {
       id: Date.now(),
@@ -1108,13 +1141,14 @@ function initMeals() {
       protein: parseInt(document.getElementById("mealProtein").value) || 0,
       carbs: parseInt(document.getElementById("mealCarbs")?.value) || 0,
       fat: parseInt(document.getElementById("mealFat")?.value) || 0,
-      date: new Date().toISOString(),
+      date: mealTimestamp,
     };
 
     meals.unshift(meal);
     Storage.set("meals", meals);
 
     form.reset();
+    if (mealDateInput) mealDateInput.value = todayKey;
     renderMeals();
     updateStats();
     updateNutritionGoals();
@@ -1125,6 +1159,13 @@ function initMeals() {
   renderDefaultMeals();
   renderMeals();
   updateNutritionGoals();
+}
+
+function getSelectedMealDate() {
+  const input = document.getElementById("mealDate");
+  const value = input?.value;
+  if (value) return value;
+  return new Date().toISOString().split("T")[0];
 }
 
 function renderDefaultMeals() {
@@ -1184,6 +1225,9 @@ function renderDefaultMeals() {
 }
 
 function addDefaultMeal(type, description, calories, protein, carbs, fat) {
+  const selectedDate = getSelectedMealDate();
+  const mealTimestamp = new Date(`${selectedDate}T12:00:00`).toISOString();
+
   const meal = {
     id: Date.now(),
     type: type,
@@ -1192,7 +1236,7 @@ function addDefaultMeal(type, description, calories, protein, carbs, fat) {
     protein: protein,
     carbs: carbs,
     fat: fat,
-    date: new Date().toISOString(),
+    date: mealTimestamp,
   };
 
   meals.unshift(meal);
@@ -1205,18 +1249,26 @@ function addDefaultMeal(type, description, calories, protein, carbs, fat) {
 
 function renderMeals() {
   const list = document.getElementById("mealList");
-  const today = new Date().toDateString();
+  const todayKey = new Date().toISOString().split("T")[0];
+  const filterDate =
+    document.getElementById("mealHistoryDate")?.value || todayKey;
 
-  if (meals.length === 0) {
+  const mealsForDay = meals.filter((meal) => {
+    const mealKey = new Date(meal.date).toISOString().split("T")[0];
+    return mealKey === filterDate;
+  });
+
+  if (mealsForDay.length === 0) {
     list.innerHTML =
       '<div class="empty-state">Nenhuma refeição registrada ainda. Comece agora!</div>';
     return;
   }
 
-  list.innerHTML = meals
+  list.innerHTML = mealsForDay
     .map((meal) => {
       const mealDate = new Date(meal.date);
-      const isToday = mealDate.toDateString() === today;
+      const mealKey = mealDate.toISOString().split("T")[0];
+      const isToday = mealKey === todayKey;
 
       return `
             <div class="record-item">
