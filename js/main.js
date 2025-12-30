@@ -1056,31 +1056,29 @@ function updateWaterProgress() {
   const percentage = Math.min((todayWater / waterGoal) * 100, 100);
 
   document.getElementById("waterProgress").style.width = percentage + "%";
-  document.getElementById("waterPercent").textContent = Math.round(percentage);
+  document.getElementById("waterPercent").textContent = `${Math.round(percentage)}% (${todayWater}ml)`;
 }
 
 function renderWaterRecords() {
   const list = document.getElementById("waterList");
+  const today = new Date().toDateString();
 
-  if (waterRecords.length === 0) {
+  const todayRecords = waterRecords.filter(
+    (record) => new Date(record.date).toDateString() === today
+  );
+
+  if (todayRecords.length === 0) {
     list.innerHTML =
-      '<div class="empty-state">Nenhum registro de água ainda. Hidrate-se!</div>';
+      '<div class="empty-state">Nenhum registro de água para hoje. Hidrate-se!</div>';
     return;
   }
 
-  const today = new Date().toDateString();
-
-  list.innerHTML = waterRecords
+  list.innerHTML = todayRecords
     .map((record) => {
-      const recordDate = new Date(record.date);
-      const isToday = recordDate.toDateString() === today;
-
       return `
             <div class="record-item">
                 <div class="record-info">
-                    <div class="record-title">💧 ${record.amount}ml ${
-        isToday ? "(Hoje)" : ""
-      }</div>
+                    <div class="record-title">💧 ${record.amount}ml</div>
                     <div class="record-time">${formatDateTime(
                       record.date
                     )}</div>
