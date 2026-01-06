@@ -299,6 +299,9 @@ let currentEdit = null; // { type: 'workout' | 'water' | 'meal', id: number }
 // Mês atual do calendário
 let currentCalendarMonth = new Date().getMonth();
 
+// Data que está sendo exibida na lista de exercícios (YYYY-MM-DD) — usado para toggle
+let displayedWorkoutDate = null;
+
 // Inicialização
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
@@ -406,12 +409,111 @@ function initDailyWorkout() {
   document
     .getElementById("confirmCompleteWorkoutBtn")
     .addEventListener("click", saveCompleteWorkout);
+
+  // Event delegation para permitir marcar exercício clicando no item (ou no checkbox)
+  const exercisesListEl = document.getElementById("exercisesList");
+  if (exercisesListEl && !exercisesListEl._hasClickHandler) {
+    exercisesListEl.addEventListener("click", (ev) => {
+      // Se o clique veio diretamente do checkbox, deixar o comportamento nativo (evita dupla alternância)
+      if (
+        ev.target &&
+        ev.target.classList &&
+        ev.target.classList.contains("exercise-checkbox")
+      )
+        return;
+
+      const item = ev.target.closest && ev.target.closest(".exercise-item");
+      if (!item) return;
+
+      // encontrar o índice do item dentro do container
+      const items = Array.from(
+        exercisesListEl.querySelectorAll(".exercise-item")
+      );
+      const index = items.indexOf(item);
+      if (index === -1) return;
+
+      // Se o checkbox estiver desabilitado (por exemplo em loadWorkoutForDayOfWeek),
+      // inicializar o status diário a partir do plano exibido e permitir togglear.
+      const checkbox = item.querySelector("input[type=checkbox]");
+      if (checkbox && checkbox.disabled) {
+        // Se já estivermos mostrando uma data específica, não deve acontecer aqui
+        // Mas se estiver mostrando o plano semanal (displayedWorkoutDate === null),
+        // inicializar o registro do dia atual com os exercícios exibidos.
+        if (displayedWorkoutDate === null) {
+          const dateKey = new Date().toISOString().split("T")[0];
+          // Construir lista de exercícios a partir do DOM atual
+          const domItems = items.map((it) => {
+            const cb = it.querySelector("input[type=checkbox]");
+            const nameEl = it.querySelector(".exercise-name");
+            const detailsEl = it.querySelector(".exercise-details");
+            return {
+              name: nameEl ? nameEl.textContent : "",
+              details: detailsEl ? detailsEl.textContent : "",
+              completed: cb ? !!cb.checked : false,
+            };
+          });
+
+          dailyWorkoutStatus[dateKey] = {
+            exercises: domItems,
+            completed: false,
+          };
+          // Salvar e forçar re-render para garantir inputs habilitados
+          saveDailyWorkoutStatus();
+          renderDailyExercises();
+          // Recomputar item/checkbox após render
+          const refreshedItems = Array.from(
+            exercisesListEl.querySelectorAll(".exercise-item")
+          );
+          const refreshedItem = refreshedItems[index];
+          if (refreshedItem) {
+            const refreshedCheckbox = refreshedItem.querySelector(
+              "input[type=checkbox]"
+            );
+            if (refreshedCheckbox) refreshedCheckbox.disabled = false;
+          }
+        } else {
+          return;
+        }
+      }
+
+      // Determina qual data está sendo exibida; se não houver, usar data atual
+      const dateKey =
+        displayedWorkoutDate || new Date().toISOString().split("T")[0];
+
+      // Alternar estado
+      if (
+        !dailyWorkoutStatus[dateKey] ||
+        !dailyWorkoutStatus[dateKey].exercises
+      )
+        return;
+      dailyWorkoutStatus[dateKey].exercises[index].completed =
+        !dailyWorkoutStatus[dateKey].exercises[index].completed;
+      saveDailyWorkoutStatus();
+      // Re-render apenas a lista diária
+      if (dateKey === new Date().toISOString().split("T")[0])
+        renderDailyExercises();
+      else {
+        // Atualizar visual do item manualmente
+        if (dailyWorkoutStatus[dateKey].exercises[index].completed) {
+          item.classList.add("completed");
+          if (checkbox) checkbox.checked = true;
+        } else {
+          item.classList.remove("completed");
+          if (checkbox) checkbox.checked = false;
+        }
+      }
+    });
+    exercisesListEl._hasClickHandler = true;
+  }
 }
 
 function renderDailyExercises() {
   const today = new Date();
   const dateKey = today.toISOString().split("T")[0];
   const dayStatus = dailyWorkoutStatus[dateKey];
+
+  // marcar qual data está sendo exibida (lista diária usa hoje)
+  displayedWorkoutDate = dateKey;
 
   const exercisesList = document.getElementById("exercisesList");
 
@@ -452,8 +554,8 @@ function renderDailyExercises() {
 
 // Permite marcar/desmarcar exercício no treino do dia (usa o dia atual)
 function toggleExercise(index) {
-  const today = new Date();
-  const dateKey = today.toISOString().split("T")[0];
+  const dateKey =
+    displayedWorkoutDate || new Date().toISOString().split("T")[0];
 
   if (!dailyWorkoutStatus[dateKey]) return;
 
@@ -462,7 +564,9 @@ function toggleExercise(index) {
 
   exercises[index].completed = !exercises[index].completed;
   saveDailyWorkoutStatus();
-  renderDailyExercises();
+  // Re-render a lista correta: se estivermos mostrando o dia atual, re-renderizar; caso contrário atualizar visual do item
+  if (dateKey === new Date().toISOString().split("T")[0])
+    renderDailyExercises();
 }
 
 function loadWorkoutForDayOfWeek(dayOfWeek) {
@@ -518,6 +622,9 @@ function loadWorkoutForDayOfWeek(dayOfWeek) {
   `
     )
     .join("");
+
+  // Quando carregamos plano por dia da semana, não estamos mostrando uma data específica
+  displayedWorkoutDate = null;
 }
 
 function completeWorkout() {
