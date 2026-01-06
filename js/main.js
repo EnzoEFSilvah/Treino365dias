@@ -790,7 +790,7 @@ function saveDailyWorkoutStatus() {
 // CALENDÁRIO DE TREINOS
 function renderWorkoutCalendar() {
   const calendar = document.getElementById("workoutCalendar");
-  const year = 2025;
+  const year = new Date().getFullYear();
   const today = new Date();
 
   let calendarHTML = "";
@@ -898,18 +898,24 @@ function renderWorkoutCalendar() {
     });
   }
 
-  // Atualizar estatísticas
+  // Atualizar estatísticas (usa o ano atual)
   const yearCount = completedWorkoutDates.filter((date) =>
-    date.startsWith("2025")
+    date.startsWith(`${year}-`)
   ).length;
   const currentMonth = today.getMonth() + 1;
-  const monthPrefix = `2025-${String(currentMonth).padStart(2, "0")}`;
+  const monthPrefix = `${year}-${String(currentMonth).padStart(2, "0")}`;
   const monthCount = completedWorkoutDates.filter((date) =>
     date.startsWith(monthPrefix)
   ).length;
 
   document.getElementById("yearWorkoutCount").textContent = yearCount;
   document.getElementById("monthWorkoutCount").textContent = monthCount;
+
+  // Atualiza rótulos do ano na página, se existirem
+  const yearLabelEl = document.getElementById("yearLabel");
+  if (yearLabelEl) yearLabelEl.textContent = year;
+  const calendarYearEl = document.getElementById("calendarYear");
+  if (calendarYearEl) calendarYearEl.textContent = year;
 
   // Adicionar listeners de clique aos dias do calendário
   const calendarDays = document.querySelectorAll(".calendar-day.completed");
