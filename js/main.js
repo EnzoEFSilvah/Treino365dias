@@ -290,6 +290,9 @@ let dailyWorkoutStatus =
 let completedWorkoutDates =
   JSON.parse(localStorage.getItem("completedWorkoutDates")) || [];
 
+// Data alvo ao marcar/editar conclusão (usado pelo modal)
+let completeTargetDate = null;
+
 // Estado de edição de registros de histórico
 let currentEdit = null; // { type: 'workout' | 'water' | 'meal', id: number }
 
@@ -447,6 +450,21 @@ function renderDailyExercises() {
     .join("");
 }
 
+// Permite marcar/desmarcar exercício no treino do dia (usa o dia atual)
+function toggleExercise(index) {
+  const today = new Date();
+  const dateKey = today.toISOString().split("T")[0];
+
+  if (!dailyWorkoutStatus[dateKey]) return;
+
+  const exercises = dailyWorkoutStatus[dateKey].exercises;
+  if (!exercises || !exercises[index]) return;
+
+  exercises[index].completed = !exercises[index].completed;
+  saveDailyWorkoutStatus();
+  renderDailyExercises();
+}
+
 function loadWorkoutForDayOfWeek(dayOfWeek) {
   // dayOfWeek: 1=segunda, 2=terça, ..., 7=domingo
   const defaultPlan = defaultWorkoutPlans[dayOfWeek];
@@ -522,6 +540,17 @@ function completeWorkout() {
   }
 
   // Abrir modal para registrar tempo e calorias
+  completeTargetDate = dateKey;
+
+  // Preencher campos com valores salvos, se existirem
+  const status = dailyWorkoutStatus[dateKey];
+  const timeEl = document.getElementById("workoutTime");
+  const calEl = document.getElementById("workoutCalories");
+  if (status && status.duration) timeEl.value = status.duration;
+  else timeEl.value = "";
+  if (status && status.calories) calEl.value = status.calories;
+  else calEl.value = "";
+
   openCompleteWorkoutModal();
 }
 
@@ -546,8 +575,19 @@ function saveCompleteWorkout() {
     return;
   }
 
-  const today = new Date();
-  const dateKey = today.toISOString().split("T")[0];
+  // Determina qual data estamos registrando (pode ser uma data clicada no calendário)
+  const dateKey = completeTargetDate || new Date().toISOString().split("T")[0];
+
+  // Garantir que exista um objeto de status para a data
+  if (!dailyWorkoutStatus[dateKey]) {
+    const dt = new Date(dateKey + "T12:00:00");
+    const dow = dt.getDay();
+    const plan = workoutPlans[dow] || { exercises: [] };
+    dailyWorkoutStatus[dateKey] = {
+      exercises: JSON.parse(JSON.stringify(plan.exercises || [])),
+      completed: false,
+    };
+  }
 
   // Marcar como concluído com tempo e calorias
   dailyWorkoutStatus[dateKey].completed = true;
@@ -568,6 +608,9 @@ function saveCompleteWorkout() {
   updateStats();
 
   closeCompleteWorkoutModal();
+
+  // Limpar data alvo após salvar
+  completeTargetDate = null;
 
   showNotification(
     `🎉 Treino concluído! ⏱️ ${workoutTime}min | 🔥 ${workoutCalories}kcal`
@@ -918,13 +961,37 @@ function renderWorkoutCalendar() {
   if (calendarYearEl) calendarYearEl.textContent = year;
 
   // Adicionar listeners de clique aos dias do calendário
-  const calendarDays = document.querySelectorAll(".calendar-day.completed");
+  const calendarDays = document.querySelectorAll(".calendar-day");
   calendarDays.forEach((day) => {
     day.addEventListener("click", (e) => {
       const dateKey = e.currentTarget.dataset.date;
-      if (dateKey) {
-        openDayDataModal(dateKey);
+      if (!dateKey) return;
+
+      // Definir data alvo para o modal de conclusão
+      completeTargetDate = dateKey;
+
+      // Se não existir status para essa data, inicializar a partir do plano semanal
+      if (!dailyWorkoutStatus[dateKey]) {
+        const dt = new Date(dateKey + "T12:00:00");
+        const dow = dt.getDay(); // 0=Dom, 1=Seg, ... 6=Sáb
+        const plan = workoutPlans[dow] || { exercises: [] };
+        dailyWorkoutStatus[dateKey] = {
+          exercises: JSON.parse(JSON.stringify(plan.exercises || [])),
+          completed: false,
+        };
+        saveDailyWorkoutStatus();
       }
+
+      // Preencher campos do modal com valores existentes, se houver
+      const status = dailyWorkoutStatus[dateKey];
+      const timeEl = document.getElementById("workoutTime");
+      const calEl = document.getElementById("workoutCalories");
+      if (status && status.duration) timeEl.value = status.duration;
+      else timeEl.value = "";
+      if (status && status.calories) calEl.value = status.calories;
+      else calEl.value = "";
+
+      openCompleteWorkoutModal();
     });
   });
 }
@@ -1062,7 +1129,9 @@ function updateWaterProgress() {
   const percentage = Math.min((todayWater / waterGoal) * 100, 100);
 
   document.getElementById("waterProgress").style.width = percentage + "%";
-  document.getElementById("waterPercent").textContent = `${Math.round(percentage)}% (${todayWater}ml)`;
+  document.getElementById("waterPercent").textContent = `${Math.round(
+    percentage
+  )}% (${todayWater}ml)`;
 }
 
 function renderWaterRecords() {
